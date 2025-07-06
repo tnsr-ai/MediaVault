@@ -1,8 +1,18 @@
+import { Metadata } from "next";
+import Login from "../components/auth/Login";
+import AuthHero from "../components/auth/AuthHero";
+
+export const metadata: Metadata = {
+  title: "MediaVault - Login",
+  description: "A media vault for your personal files",
+  keywords: ["media", "vault", "personal files", "storage"],
+};
+
 export default function Home() {
   return (
-    <div className="flex w-full h-full m-0 p-0">
-      <div className="bg-red-300 flex-1">Login Component</div>
-      <div className="bg-blue-300 flex-1">Auth Hero Section</div>
-    </div>
+    <main className="flex w-full h-full">
+      <Login />
+      <AuthHero />
+    </main>
   );
 }
