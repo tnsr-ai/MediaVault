@@ -3,7 +3,7 @@ import AuthHeroWave from "./AuthHeroWave";
 
 export default function AuthHero() {
     return (
-        <section className="flex-1 flex justify-center items-center h-full rounded-3xl">
+        <section className="flex-2 flex justify-center items-center h-full rounded-3xl">
             <AuthHeroWave
                 speed={5}
                 scale={0.8}

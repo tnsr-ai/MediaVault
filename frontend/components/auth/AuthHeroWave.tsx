@@ -155,7 +155,7 @@ const AuthHeroWave: React.FC<SilkProps> = ({
   );
 
   return (
-    <Canvas dpr={[1, 2]} frameloop="always" className="w-full h-full rounded-[20]">
+    <Canvas dpr={[1, 2]} frameloop="always" className="w-full h-full rounded-2xl">
       <SilkPlane ref={meshRef} uniforms={uniforms} />
     </Canvas>
   );
