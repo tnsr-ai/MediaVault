@@ -13,14 +13,14 @@ const spectral = Spectral({
 export default function Login() {
 
   return (
-    <section className="flex-3 justify-center items-center flex h-full w-full">
-      <div className="flex flex-col justify-center items-center w-full h-full">
-        <div className="w-full justify-start ml-10 hidden md:block">
+    <section className="flex-3 flex h-full w-full justify-center items-center">
+      <div className="flex flex-col justify-center w-full h-full items-center">
+        <div className="w-full justify-center hidden md:flex md:justify-start md:ml-10">
           <p className={`block text-4xl text-[#d5dcd9] tracking-tighter ${spectral.className}`}>MediaVault</p>
         </div>
-        <div className="flex justify-center items-center w-full h-full px-10">
-          <div className="w-full max-w-lg mx-auto">
-            <div className="flex justify-start mb-8">
+        <div className="flex justify-center items-center w-full h-full px-4 md:px-10">
+          <div className="w-full max-w-none md:max-w-lg md:mx-auto">
+            <div className="flex justify-center md:justify-start mb-8">
               <Image
                 src="/icon.png"
                 width={100}
@@ -28,13 +28,12 @@ export default function Login() {
                 alt="MediaVault Logo"
               />
             </div>
-            <div className='text-start space-y-2 mb-10'>
-              <p className='text-3xl text-black tracking-tighter font-bold'>Get Started</p>
+            <div className='text-center md:text-start space-y-2 mb-10'>
+              <p className='text-3xl text-black tracking-tighter font-bold'>Access Vault</p>
               <p className='text-xl text-[#a4a09d] tracking-tight font-semibold'>Welcome to MediaVault - Login to your account</p>
             </div>
-            <hr className="mb-10 h-0.5 border-t-0 bg-[#e4e5e4]" />
+            <hr className="mb-5 md:mb-10 h-0.5 border-t-0 bg-[#e4e5e4]" />
 
-            {/* Login Form */}
             <form className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base font-medium text-black tracking-tight">

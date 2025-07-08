@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="flex w-full h-full space-x-7">
+    <main className="flex w-full h-full md:space-x-7">
       <Login />
       <AuthHero className="hidden md:block" />
     </main>
