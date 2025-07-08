@@ -15,7 +15,7 @@ export default function Login() {
   return (
     <section className="flex-3 justify-center items-center flex h-full w-full">
       <div className="flex flex-col justify-center items-center w-full h-full">
-        <div className="w-full flex justify-start ml-10">
+        <div className="w-full justify-start ml-10 hidden md:block">
           <p className={`block text-4xl text-[#d5dcd9] tracking-tighter ${spectral.className}`}>MediaVault</p>
         </div>
         <div className="flex justify-center items-center w-full h-full px-10">
@@ -29,15 +29,15 @@ export default function Login() {
               />
             </div>
             <div className='text-start space-y-2 mb-10'>
-              <p className='text-3xl text-black tracking-tighter font-semibold'>Get Started</p>
-              <p className='text-xl text-[#a4a09d]'>Welcome to MediaVault - Login to your account</p>
+              <p className='text-3xl text-black tracking-tighter font-bold'>Get Started</p>
+              <p className='text-xl text-[#a4a09d] tracking-tight font-semibold'>Welcome to MediaVault - Login to your account</p>
             </div>
             <hr className="mb-10 h-0.5 border-t-0 bg-[#e4e5e4]" />
 
             {/* Login Form */}
             <form className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-base font-medium text-black">
+                <Label htmlFor="email" className="text-base font-medium text-black tracking-tight">
                   Email
                 </Label>
                 <Input
@@ -50,9 +50,14 @@ export default function Login() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-base font-medium text-black">
-                  Password
-                </Label>
+                <div className='flex items-center justify-between'>
+                  <Label htmlFor="password" className="text-base font-medium text-black tracking-tight">
+                    Password
+                  </Label>
+                  <a href="#" className="text-base font-medium text-black hover:text-[#5f947cab] transition-colors tracking-tight">
+                    Forgot?
+                  </a>
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -61,34 +66,17 @@ export default function Login() {
                   required
                 />
               </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <input
-                    id="remember"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-[#e4e5e4] text-black focus:ring-black"
-                  />
-                  <Label htmlFor="remember" className="text-sm text-[#a4a09d]">
-                    Remember me
-                  </Label>
-                </div>
-                <a href="#" className="text-sm text-black hover:text-[#a4a09d] transition-colors">
-                  Forgot password?
-                </a>
-              </div>
-
               <Button
                 type="submit"
-                className="w-full h-12 bg-black hover:bg-[#333333] text-white font-medium tracking-tight transition-colors"
+                className="w-full h-12 bg-gradient-to-r from-[#0a1d12] via-[#15412e] to-[#247050] hover:from-[#0f251a] hover:via-[#1a4d37] hover:to-[#2a8460] text-white font-medium tracking-tight transition-all duration-300"
               >
                 Sign In
               </Button>
 
               <div className="text-center">
-                <span className="text-[#a4a09d]">Already have an account? </span>
-                <a href="#" className="text-black hover:text-[#a4a09d] font-medium transition-colors">
-                  Log in
+                <span className="text-[#a4a09d] tracking-tight">Don't have an account? </span>
+                <a href="#" className="text-base font-medium text-black hover:text-[#5f947cab] transition-colors tracking-tight">
+                  Sign up
                 </a>
               </div>
             </form>

@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <main className="flex w-full h-full space-x-7">
       <Login />
-      <AuthHero />
+      <AuthHero className="hidden md:block" />
     </main>
   );
 }
