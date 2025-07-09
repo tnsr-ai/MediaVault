@@ -38,7 +38,10 @@ export default function Signup() {
               <p className={theme.typography.heading.primary}>{config.forms.signup.title}</p>
               <p className={theme.typography.heading.secondary}>{config.forms.signup.description}</p>
             </div>
-            <hr className={`mb-5 md:mb-10 h-0.5 border-t-0 bg-[${theme.colors.ui.border}]`} />
+            <hr
+              className="mb-5 md:mb-10 h-0.5 border-t-0"
+              style={{ background: theme.colors.ui.border }}
+            />
 
             <form className={theme.components.form.spacing}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

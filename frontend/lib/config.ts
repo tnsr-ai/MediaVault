@@ -51,6 +51,32 @@ export const config = {
         },
       },
     },
+    forgotPassword: {
+      title: 'Forgot your password?',
+      description: 'Enter your email to reset password.',
+      submitButtonText: 'Send Reset Link',
+      signInPrompt: 'Remembered your password?',
+      signInText: 'Sign in',
+      fields: {
+        email: {
+          label: 'Email Address',
+          placeholder: 'Enter your email address',
+        },
+      },
+    },
+    twoFA: {
+      title: 'Two-Factor Authentication',
+      description: 'Enter the 6-digit code from your authenticator app.',
+      submitButtonText: 'Verify',
+      signInPrompt: 'Back to sign in?',
+      signInText: 'Sign in',
+      fields: {
+        code: {
+          label: 'Authentication Code',
+          placeholder: 'Enter 6-digit code',
+        },
+      },
+    },
   },
 
   // Wave animation settings

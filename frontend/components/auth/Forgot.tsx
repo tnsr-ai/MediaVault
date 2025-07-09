@@ -12,8 +12,7 @@ const spectral = Spectral({
   style: ['italic'],
 });
 
-export default function Login() {
-
+export default function Forgot() {
   return (
     <section className={theme.layout.section}>
       <div className="flex flex-col justify-center w-full h-full items-center">
@@ -35,8 +34,8 @@ export default function Login() {
               />
             </div>
             <div className='text-center md:text-start space-y-2 mb-10'>
-              <p className={theme.typography.heading.primary}>{config.forms.login.title}</p>
-              <p className={theme.typography.heading.secondary}>{config.app.description}</p>
+              <p className={theme.typography.heading.primary}>{config.forms.forgotPassword.title}</p>
+              <p className={theme.typography.heading.secondary}>{config.forms.forgotPassword.description}</p>
             </div>
             <hr
               className="mb-5 md:mb-10 h-0.5 border-t-0"
@@ -46,53 +45,32 @@ export default function Login() {
             <form className={theme.components.form.spacing}>
               <div className={theme.components.form.fieldSpacing}>
                 <Label htmlFor="email" className={theme.typography.label}>
-                  Email
+                  {config.forms.forgotPassword.fields.email.label}
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={config.forms.forgotPassword.fields.email.placeholder}
                   className={getInputStyles()}
                   required
                 />
               </div>
 
-              <div className={theme.components.form.fieldSpacing}>
-                <div className='flex items-center justify-between'>
-                  <Label htmlFor="password" className={theme.typography.label}>
-                    Password
-                  </Label>
-                  {config.features.showForgotPassword && (
-                    <Link href="/forgot-password" className={getLinkStyles()}>
-                      {config.forms.login.forgotPasswordText}
-                    </Link>
-                  )}
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  className={getInputStyles()}
-                  required
-                />
-              </div>
               <Button
                 type="submit"
                 className={`w-full h-12 ${getButtonStyles('primary')} font-medium tracking-tight`}
               >
-                {config.forms.login.submitButtonText}
+                {config.forms.forgotPassword.submitButtonText}
               </Button>
 
-              {config.features.showSignUpLink && (
-                <div className="text-center">
-                  <span className={`${theme.colors.ui.text.secondary} tracking-tight`}>
-                    {config.forms.login.signUpPrompt}{' '}
-                  </span>
-                  <Link href="/signup" className={getLinkStyles()}>
-                    {config.forms.login.signUpText}
-                  </Link>
-                </div>
-              )}
+              <div className="text-center">
+                <span className={`${theme.colors.ui.text.secondary} tracking-tight`}>
+                  {config.forms.forgotPassword.signInPrompt}{' '}
+                </span>
+                <Link href="/" className={getLinkStyles()}>
+                  {config.forms.forgotPassword.signInText}
+                </Link>
+              </div>
             </form>
           </div>
         </div>
