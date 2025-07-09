@@ -1,3 +1,4 @@
+'use client';
 import { Spectral } from 'next/font/google'
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import Link from 'next/link';
 import { theme, getButtonStyles, getInputStyles, getLinkStyles } from '@/lib/theme';
 import { config } from '@/lib/config';
+import { useRouter } from 'next/navigation';
 
 const spectral = Spectral({
   weight: ['400'],
@@ -14,8 +16,10 @@ const spectral = Spectral({
 
 export default function Login() {
 
+  const router = useRouter();
+
   return (
-    <section className={theme.layout.section}>
+    <section className={`${theme.layout.section} my-5 md:my-0`}>
       <div className="flex flex-col justify-center w-full h-full items-center">
         {config.features.showBrandName && (
           <div className="w-full justify-center hidden md:flex md:justify-start md:ml-10">
@@ -79,6 +83,11 @@ export default function Login() {
               <Button
                 type="submit"
                 className={`w-full h-12 ${getButtonStyles('primary')} font-medium tracking-tight`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Handle login logic here
+                  router.push('/2fa');
+                }}
               >
                 {config.forms.login.submitButtonText}
               </Button>

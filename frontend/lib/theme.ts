@@ -79,7 +79,7 @@ export const theme = {
   
   // Layout
   layout: {
-    container: 'w-full max-w-none md:max-w-lg md:mx-auto',
+    container: 'w-full h-full md:h-auto max-w-none md:max-w-lg md:mx-auto',
     section: 'flex-3 flex h-full w-full justify-center items-center',
     heroSection: 'flex-2 flex justify-center items-center h-full rounded-3xl relative',
   },

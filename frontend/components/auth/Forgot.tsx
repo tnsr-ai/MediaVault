@@ -14,7 +14,7 @@ const spectral = Spectral({
 
 export default function Forgot() {
   return (
-    <section className={theme.layout.section}>
+    <section className={`${theme.layout.section} my-5 md:my-0`}>
       <div className="flex flex-col justify-center w-full h-full items-center">
         {config.features.showBrandName && (
           <div className="w-full justify-center hidden md:flex md:justify-start md:ml-10">

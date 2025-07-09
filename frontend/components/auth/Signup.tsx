@@ -15,7 +15,7 @@ const spectral = Spectral({
 export default function Signup() {
 
   return (
-    <section className={theme.layout.section}>
+    <section className={`${theme.layout.section} my-5 md:my-0`}>
       <div className="flex flex-col justify-center w-full h-full items-center">
         {config.features.showBrandName && (
           <div className="w-full justify-center hidden md:flex md:justify-start md:ml-10">
@@ -118,7 +118,7 @@ export default function Signup() {
                 {config.forms.signup.submitButtonText}
               </Button>
 
-              <div className="text-center">
+              <div className="text-center pb-10 md:pb-0">
                 <span className={`${theme.colors.ui.text.secondary} tracking-tight`}>
                   {config.forms.signup.signInPrompt}{' '}
                 </span>
