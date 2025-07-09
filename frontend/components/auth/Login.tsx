@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import Link from 'next/link';
 import { theme, getButtonStyles, getInputStyles, getLinkStyles } from '@/lib/theme';
 import { config } from '@/lib/config';
 
@@ -85,9 +85,9 @@ export default function Login() {
                   <span className={`${theme.colors.ui.text.secondary} tracking-tight`}>
                     {config.forms.login.signUpPrompt}{' '}
                   </span>
-                  <a href="#" className={getLinkStyles()}>
+                  <Link href="/signup" className={getLinkStyles()}>
                     {config.forms.login.signUpText}
-                  </a>
+                  </Link>
                 </div>
               )}
             </form>

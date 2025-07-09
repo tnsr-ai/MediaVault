@@ -16,11 +16,40 @@ export const config = {
   // Form configuration
   forms: {
     login: {
-      title: 'Access Vault',
+      title: 'Sign in to MediaVault',
       submitButtonText: 'Sign In',
-      forgotPasswordText: 'Forgot?',
+      forgotPasswordText: 'Forgot password?',
       signUpPrompt: "Don't have an account?",
-      signUpText: 'Sign up',
+      signUpText: 'Create one',
+    },
+    signup: {
+      title: 'Create your MediaVault account',
+      description: 'Sign up to securely store and manage your personal files.',
+      submitButtonText: 'Create Account',
+      signInPrompt: 'Already have an account?',
+      signInText: 'Sign in',
+      fields: {
+        firstName: {
+          label: 'First Name',
+          placeholder: 'Enter your first name',
+        },
+        lastName: {
+          label: 'Last Name',
+          placeholder: 'Enter your last name',
+        },
+        email: {
+          label: 'Email Address',
+          placeholder: 'Enter your email address',
+        },
+        password: {
+          label: 'Password',
+          placeholder: 'Create a password',
+        },
+        confirmPassword: {
+          label: 'Confirm Password',
+          placeholder: 'Re-enter your password',
+        },
+      },
     },
   },
 
