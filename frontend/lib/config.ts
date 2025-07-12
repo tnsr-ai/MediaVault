@@ -77,6 +77,19 @@ export const config = {
         },
       },
     },
+    verifyEmail: {
+      title: 'Verify Your Email',
+      description: 'Please check your email for a verification code.',
+      submitButtonText: 'Verify Email',
+      signInPrompt: 'Already signed in?',
+      signInText: 'Sign in',
+      fields: {
+        code: {
+          label: 'Verification Code',
+          placeholder: 'Enter the 6 digit code sent to your email',
+        },
+      },
+    }
   },
 
   // Wave animation settings
