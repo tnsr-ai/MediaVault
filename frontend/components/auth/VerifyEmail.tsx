@@ -19,7 +19,13 @@ const spectral = Spectral({
 	style: ["italic"],
 });
 
-const CODE_KEYS = ["code-0", "code-1", "code-2", "code-3", "code-4", "code-5"];
+// Configuration for verification code input
+const CODE_LENGTH = 6;
+const CODE_INPUTS = Array.from({ length: CODE_LENGTH }, (_, i) => ({
+	id: `code-${i}`,
+	key: `verification-input-${i}`,
+	index: i,
+}));
 
 export default function VerifyEmail() {
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -30,7 +36,7 @@ export default function VerifyEmail() {
 		value = value.replace(/\D/g, "");
 		e.target.value = value;
 		if (value.length === 1) {
-			if (idx < 5 && inputRefs.current[idx + 1]) {
+			if (idx < CODE_LENGTH - 1 && inputRefs.current[idx + 1]) {
 				inputRefs.current[idx + 1]?.focus();
 			}
 		}
@@ -95,10 +101,10 @@ export default function VerifyEmail() {
 									{config.forms.verifyEmail.fields.code.label}
 								</Label>
 								<div className="flex gap-2 justify-center md:justify-start">
-									{CODE_KEYS.map((key, idx) => (
+									{CODE_INPUTS.map((input) => (
 										<Input
-											key={key}
-											id={key}
+											key={input.key}
+											id={input.id}
 											type="text"
 											inputMode="numeric"
 											pattern="[0-9]"
@@ -108,10 +114,10 @@ export default function VerifyEmail() {
 											className={`${getInputStyles()}·text-center·w-10·h-12`}
 											required
 											ref={(el) => {
-												inputRefs.current[idx] = el;
+												inputRefs.current[input.index] = el;
 											}}
-											onChange={(e) => handleInput(e, idx)}
-											onKeyDown={(e) => handleKeyDown(e, idx)}
+											onChange={(e) => handleInput(e, input.index)}
+											onKeyDown={(e) => handleKeyDown(e, input.index)}
 										/>
 									))}
 								</div>
