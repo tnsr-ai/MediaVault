@@ -3,6 +3,7 @@ import { config } from "@/lib/config";
 import { theme } from "@/lib/theme";
 import { Spectral } from "next/font/google";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 const spectral = Spectral({
@@ -24,16 +25,27 @@ export default function AuthFormLayout({
 	children,
 	showDivider = true,
 }: AuthFormLayoutProps) {
+	const router = useRouter();
 	return (
 		<section className={`${theme.layout.section} my-3 sm:my-5 md:my-0`}>
 			<div className="flex flex-col justify-center w-full h-full items-center">
 				{config.features.showBrandName && (
 					<div className="w-full justify-center hidden md:flex md:justify-start md:ml-10">
-						<p
+						<span
 							className={`block ${theme.typography.brand.logo} ${spectral.className}`}
+							onClick={() => router.push("/")}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									router.push("/");
+								}
+							}}
+							role="button"
+							tabIndex={0}
+							style={{ cursor: "pointer" }}
 						>
 							{config.app.name}
-						</p>
+						</span>
 					</div>
 				)}
 				<div className="flex justify-center items-center w-full h-full px-4 md:px-10">
