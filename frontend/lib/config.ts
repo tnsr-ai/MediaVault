@@ -87,8 +87,8 @@ export const config = {
 			title: "Two-Factor Authentication",
 			description: "Enter the 6-digit code from your authenticator app.",
 			submitButtonText: "Verify",
-			signInPrompt: "Back to sign in?",
-			signInText: "Sign in",
+			signInPrompt: "Having trouble?",
+			signInText: "Back to login",
 			fields: {
 				code: {
 					label: "Authentication Code",

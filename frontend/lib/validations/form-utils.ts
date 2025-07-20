@@ -9,7 +9,7 @@ export const getErrorMessageStyles = () => {
 // Enhanced input styles with error state
 export const getInputWithErrorStyles = (error?: FieldError) => {
 	const baseStyles =
-		"flex h-12 w-full rounded-lg border px-4 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+		"flex h-10 sm:h-12 w-full rounded-lg border px-4 py-2 text-sm sm:text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
 	if (error) {
 		return `${baseStyles} border-red-500 focus-visible:ring-red-500`;

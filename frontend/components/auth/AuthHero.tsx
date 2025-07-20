@@ -7,6 +7,7 @@ import AuthHeroWave from "./AuthHeroWave";
 const spectral = Spectral({
 	weight: ["400"],
 	style: ["italic"],
+	subsets: ["latin"],
 });
 
 interface AuthHeroProps {

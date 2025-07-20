@@ -21,4 +21,4 @@ repos:
    rev: v2.4.1
    hooks:
      - id: codespell
-       args: [--skip, app-ui/package-lock.json]
+       args: [--skip, "app-ui/package-lock.json,frontend/package-lock.json"]

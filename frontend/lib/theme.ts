@@ -41,8 +41,9 @@ export const theme = {
 	// Component styles
 	components: {
 		input: {
-			height: "h-12",
+			height: "h-10 sm:h-12",
 			border: "border-[#e4e5e4]",
+			text: "text-sm sm:text-base",
 		},
 
 		card: {
@@ -52,30 +53,32 @@ export const theme = {
 		},
 
 		form: {
-			spacing: "space-y-6",
-			fieldSpacing: "space-y-2",
+			spacing: "space-y-4 sm:space-y-6",
+			fieldSpacing: "space-y-1.5 sm:space-y-2",
 		},
 	},
 
 	// Typography
 	typography: {
 		heading: {
-			primary: "text-3xl text-black tracking-tighter font-bold",
-			secondary: "text-xl text-[#a4a09d] tracking-tight font-semibold",
+			primary:
+				"text-xl sm:text-2xl md:text-3xl text-black tracking-tighter font-bold",
+			secondary:
+				"text-base sm:text-lg md:text-xl text-[#a4a09d] tracking-tight font-semibold",
 		},
 
-		label: "text-base font-medium text-black tracking-tight",
+		label: "text-sm sm:text-base font-medium text-black tracking-tight",
 
 		link: {
-			base: "text-base font-medium text-black tracking-tight",
+			base: "text-sm sm:text-base font-medium text-black tracking-tight",
 			hover: "hover:text-[#5f947cab] transition-colors",
 		},
 
 		brand: {
-			logo: "text-4xl text-[#d5dcd9] tracking-tighter",
-			hero: "text-5xl md:text-6xl text-[#c7dfd4] italic leading-tight tracking-tight",
+			logo: "text-2xl sm:text-3xl md:text-4xl text-[#d5dcd9] tracking-tighter",
+			hero: "text-4xl sm:text-5xl md:text-6xl text-[#c7dfd4] italic leading-tight tracking-tight",
 			heroSecondary:
-				"text-4xl md:text-5xl font-extralight text-[#c7dfd4] leading-tight tracking-tight",
+				"text-3xl sm:text-4xl md:text-5xl font-extralight text-[#c7dfd4] leading-tight tracking-tight",
 		},
 	},
 
@@ -103,7 +106,7 @@ export const getButtonStyles = (
 };
 
 export const getInputStyles = () => {
-	return `${theme.components.input.height} ${theme.components.input.border}`;
+	return `${theme.components.input.height} ${theme.components.input.border} ${theme.components.input.text}`;
 };
 
 export const getLinkStyles = (withHover = true) => {
