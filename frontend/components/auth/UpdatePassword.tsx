@@ -1,18 +1,25 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordStrengthIndicator } from "@/components/ui/password-strength-indicator";
 import { config } from "@/lib/config";
+import { getButtonStyles, theme } from "@/lib/theme";
 import {
-	getButtonStyles,
-	getInputStyles,
-	getLinkStyles,
-	theme,
-} from "@/lib/theme";
+	type UpdatePasswordFormData,
+	updatePasswordSchema,
+} from "@/lib/validations/auth";
+import {
+	createFormSubmitHandler,
+	getInputWithErrorStyles,
+} from "@/lib/validations/form-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Spectral } from "next/font/google";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 const spectral = Spectral({
 	weight: ["400"],
@@ -20,22 +27,42 @@ const spectral = Spectral({
 });
 
 export default function UpdatePassword() {
-	const [newPassword, setNewPassword] = useState("");
-	const [retypePassword, setRetypePassword] = useState("");
-	const [error, setError] = useState("");
+	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false);
 	const [success, setSuccess] = useState("");
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		setError("");
-		setSuccess("");
-		if (newPassword !== retypePassword) {
-			setError("Passwords do not match."); // fallback string
-			return;
-		}
-		// TODO: Add password update API call here
-		setSuccess("Password updated successfully!"); // fallback string
-	};
+	const form = useForm<UpdatePasswordFormData>({
+		resolver: zodResolver(updatePasswordSchema),
+		mode: "onSubmit",
+		reValidateMode: "onChange",
+		defaultValues: {
+			newPassword: "",
+			retypePassword: "",
+		},
+	});
+
+	const {
+		formState: { errors },
+		register,
+		handleSubmit,
+		watch,
+	} = form;
+	const newPasswordValue = watch("newPassword");
+
+	const onSubmit = createFormSubmitHandler<UpdatePasswordFormData>(
+		async (data) => {
+			// Handle password update logic here
+			console.log("Update password data:", data);
+			// Simulate API call
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			setSuccess("Password updated successfully!");
+			// Optionally redirect after success
+			setTimeout(() => {
+				router.push("/");
+			}, 2000);
+		},
+		setIsLoading,
+	);
 
 	return (
 		<section className={`${theme.layout.section} my-5 md:my-0`}>
@@ -74,7 +101,7 @@ export default function UpdatePassword() {
 
 						<form
 							className={theme.components.form.spacing}
-							onSubmit={handleSubmit}
+							onSubmit={handleSubmit(onSubmit)}
 						>
 							<div className={theme.components.form.fieldSpacing}>
 								<Label
@@ -87,11 +114,25 @@ export default function UpdatePassword() {
 									id="new-password"
 									type="password"
 									placeholder={"Enter new password"}
-									className={getInputStyles()}
-									required
-									value={newPassword}
-									onChange={(e) => setNewPassword(e.target.value)}
+									className={getInputWithErrorStyles(errors.newPassword)}
+									{...register("newPassword")}
+									aria-invalid={!!errors.newPassword}
+									aria-describedby={
+										errors.newPassword ? "newPassword-error" : undefined
+									}
 								/>
+								<FormError error={errors.newPassword} id="newPassword-error" />
+
+								{/* Password Strength Indicator */}
+								{newPasswordValue && (
+									<div className="mt-3">
+										<PasswordStrengthIndicator
+											password={newPasswordValue}
+											autoCollapse={true}
+											collapseDelay={1500}
+										/>
+									</div>
+								)}
 							</div>
 							<div className={theme.components.form.fieldSpacing}>
 								<Label
@@ -104,17 +145,18 @@ export default function UpdatePassword() {
 									id="retype-password"
 									type="password"
 									placeholder={"Retype new password"}
-									className={getInputStyles()}
-									required
-									value={retypePassword}
-									onChange={(e) => setRetypePassword(e.target.value)}
+									className={getInputWithErrorStyles(errors.retypePassword)}
+									{...register("retypePassword")}
+									aria-invalid={!!errors.retypePassword}
+									aria-describedby={
+										errors.retypePassword ? "retypePassword-error" : undefined
+									}
+								/>
+								<FormError
+									error={errors.retypePassword}
+									id="retypePassword-error"
 								/>
 							</div>
-							{error && (
-								<div className="text-red-500 text-sm mb-2 text-center">
-									{error}
-								</div>
-							)}
 							{success && (
 								<div className="text-green-500 text-sm mb-2 text-center">
 									{success}
@@ -122,11 +164,14 @@ export default function UpdatePassword() {
 							)}
 							<Button
 								type="submit"
+								disabled={isLoading}
 								className={`w-full h-12 ${getButtonStyles(
 									"primary",
-								)} font-medium tracking-tight`}
+								)} font-medium tracking-tight disabled:opacity-50 disabled:cursor-not-allowed`}
 							>
-								{config.forms.updatePassword.submitButtonText}
+								{isLoading
+									? "Updating..."
+									: config.forms.updatePassword.submitButtonText}
 							</Button>
 						</form>
 					</div>

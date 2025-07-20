@@ -1,9 +1,9 @@
-import { Canvas, type RootState, useFrame, useThree } from "@react-three/fiber";
 /* eslint-disable react/no-unknown-property */
+
+import { type RootState, useFrame, useThree } from "@react-three/fiber";
 import type React from "react";
 import { forwardRef, useLayoutEffect, useMemo, useRef } from "react";
-import type { IUniform } from "three";
-import { Color, type Mesh, type ShaderMaterial } from "three";
+import { Color, type IUniform, type Mesh, type ShaderMaterial } from "three";
 
 type NormalizedRGB = [number, number, number];
 
@@ -95,18 +95,16 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane(
 	ref,
 ) {
 	const { viewport } = useThree();
-
+	// Set mesh scale to viewport size
 	useLayoutEffect(() => {
-		const mesh = ref as React.MutableRefObject<Mesh | null>;
-		if (mesh.current) {
-			mesh.current.scale.set(viewport.width, viewport.height, 1);
+		if (ref && typeof ref !== "function" && ref.current) {
+			ref.current.scale.set(viewport.width, viewport.height, 1);
 		}
-	}, [ref, viewport]);
+	}, [viewport, ref]);
 
 	useFrame((_state: RootState, delta: number) => {
-		const mesh = ref as React.MutableRefObject<Mesh | null>;
-		if (mesh.current) {
-			const material = mesh.current.material as ShaderMaterial & {
+		if (ref && typeof ref !== "function" && ref.current) {
+			const material = ref.current.material as ShaderMaterial & {
 				uniforms: SilkUniforms;
 			};
 			material.uniforms.uTime.value += 0.1 * delta;
@@ -115,7 +113,7 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane(
 
 	return (
 		<mesh ref={ref}>
-			<planeGeometry args={[1, 1, 1, 1]} />
+			<planeGeometry args={[1, 1, 32, 32]} />
 			<shaderMaterial
 				uniforms={uniforms}
 				vertexShader={vertexShader}
@@ -134,7 +132,7 @@ export interface SilkProps {
 	rotation?: number;
 }
 
-const AuthHeroWave: React.FC<SilkProps> = ({
+const Silk: React.FC<SilkProps> = ({
 	speed = 5,
 	scale = 1,
 	color = "#7B7481",
@@ -152,18 +150,23 @@ const AuthHeroWave: React.FC<SilkProps> = ({
 			uRotation: { value: rotation },
 			uTime: { value: 0 },
 		}),
-		[speed, scale, noiseIntensity, color, rotation],
+		[color, noiseIntensity, rotation, scale, speed], // only create once
 	);
 
+	// Update uniforms when props change
+	useEffect(() => {
+		uniforms.uSpeed.value = speed;
+		uniforms.uScale.value = scale;
+		uniforms.uNoiseIntensity.value = noiseIntensity;
+		uniforms.uColor.value = new Color(...hexToNormalizedRGB(color));
+		uniforms.uRotation.value = rotation;
+	}, [speed, scale, noiseIntensity, color, rotation, uniforms]);
+
 	return (
-		<Canvas
-			dpr={[1, 2]}
-			frameloop="always"
-			className="w-full h-full rounded-2xl"
-		>
+		<Canvas dpr={[1, 2]} frameloop="always">
 			<SilkPlane ref={meshRef} uniforms={uniforms} />
 		</Canvas>
 	);
 };
 
-export default AuthHeroWave;
+export default Silk;
