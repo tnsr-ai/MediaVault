@@ -4,6 +4,7 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { config } from "@/lib/config";
+import { TWO_FA_CODE_LENGTH } from "@/lib/constants/auth";
 import { getButtonStyles, theme } from "@/lib/theme";
 import { type TwoFAFormData, twoFASchema } from "@/lib/validations/auth";
 import {
@@ -59,11 +60,14 @@ export default function TwoFA() {
 		// Handle pasted content (multiple digits)
 		if (value.length > 1) {
 			// This is likely a paste operation
-			const pastedDigits = value.substring(0, 6);
+			const pastedDigits = value.substring(0, TWO_FA_CODE_LENGTH);
 			setValue("code", pastedDigits);
 
 			// Focus the last filled input or the next empty input
-			const targetIndex = Math.min(pastedDigits.length - 1, 5);
+			const targetIndex = Math.min(
+				pastedDigits.length - 1,
+				TWO_FA_CODE_LENGTH - 1,
+			);
 			if (inputRefs.current[targetIndex]) {
 				inputRefs.current[targetIndex]?.focus();
 			}
@@ -76,10 +80,10 @@ export default function TwoFA() {
 		const currentCode = codeValue || "";
 		const newCode =
 			currentCode.substring(0, idx) + value + currentCode.substring(idx + 1);
-		setValue("code", newCode.substring(0, 6));
+		setValue("code", newCode.substring(0, TWO_FA_CODE_LENGTH));
 
 		if (value.length === 1) {
-			if (idx < 5 && inputRefs.current[idx + 1]) {
+			if (idx < TWO_FA_CODE_LENGTH - 1 && inputRefs.current[idx + 1]) {
 				inputRefs.current[idx + 1]?.focus();
 			}
 		}
@@ -90,11 +94,11 @@ export default function TwoFA() {
 		const pastedData = e.clipboardData.getData("text").replace(/\D/g, "");
 
 		if (pastedData.length > 0) {
-			const digits = pastedData.substring(0, 6);
+			const digits = pastedData.substring(0, TWO_FA_CODE_LENGTH);
 			setValue("code", digits);
 
 			// Focus the last filled input or the next empty input
-			const targetIndex = Math.min(digits.length - 1, 5);
+			const targetIndex = Math.min(digits.length - 1, TWO_FA_CODE_LENGTH - 1);
 			if (inputRefs.current[targetIndex]) {
 				inputRefs.current[targetIndex]?.focus();
 			}
@@ -145,7 +149,7 @@ export default function TwoFA() {
 						{config.forms.twoFA.fields.code.label}
 					</Label>
 					<div className="flex gap-2 justify-center md:justify-start">
-						{Array.from({ length: 6 }, (_, idx) => {
+						{Array.from({ length: TWO_FA_CODE_LENGTH }, (_, idx) => {
 							const inputId = `code-${idx}`;
 							return (
 								<Input

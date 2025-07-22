@@ -4,6 +4,10 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { config } from "@/lib/config";
+import {
+	RESEND_TIMER_SECONDS,
+	VERIFICATION_CODE_LENGTH,
+} from "@/lib/constants/auth";
 import { getButtonStyles, getLinkStyles, theme } from "@/lib/theme";
 import {
 	type VerifyEmailFormData,
@@ -16,37 +20,51 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { confirmSignUp, resendSignUpCode } from "aws-amplify/auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
 
 // Configuration for verification code input
-const CODE_LENGTH = 6;
+const CODE_LENGTH = VERIFICATION_CODE_LENGTH;
 const CODE_INPUTS = Array.from({ length: CODE_LENGTH }, (_, i) => ({
 	id: `code-${i}`,
 	key: `verification-input-${i}`,
 	index: i,
 }));
 
-export default function VerifyEmail() {
+function VerifyEmailContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const [verifyError, setVerifyError] = useState<string | null>(null);
+	const [resendTimer, setResendTimer] = useState(0);
+	const [canResend, setCanResend] = useState(true);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 	// Get email from query params if available
 	const email = searchParams.get("email") || "";
 
-	const _form = useForm<VerifyEmailFormData>({
-		resolver: zodResolver(verifyEmailSchema),
-		mode: "onSubmit",
-		reValidateMode: "onChange",
-		defaultValues: {
-			code: "",
-		},
-	});
+	// Timer effect for resend functionality
+	useEffect(() => {
+		let interval: NodeJS.Timeout;
+		if (resendTimer > 0) {
+			interval = setInterval(() => {
+				setResendTimer((prev) => {
+					if (prev <= 1) {
+						setCanResend(true);
+						return 0;
+					}
+					return prev - 1;
+				});
+			}, 1000);
+		}
+		return () => {
+			if (interval) {
+				clearInterval(interval);
+			}
+		};
+	}, [resendTimer]);
 
 	const {
 		formState: { errors },
@@ -105,14 +123,19 @@ export default function VerifyEmail() {
 	);
 
 	const handleResendCode = async () => {
+		// Prevent multiple resend attempts
+		if (!canResend) return;
+
 		// Clear any previous errors
 		setVerifyError(null);
+		setCanResend(false);
+		setResendTimer(RESEND_TIMER_SECONDS); // Start 60-second countdown
 
 		try {
 			await resendSignUpCode({
 				username: email,
 			});
-			// You might want to show a success message to the user
+			// Show success message or update UI as needed
 		} catch (error: unknown) {
 			// Handle resend errors
 			if (error instanceof Error && error.name === "LimitExceededException") {
@@ -122,6 +145,9 @@ export default function VerifyEmail() {
 			} else {
 				setVerifyError("Failed to resend verification code. Please try again.");
 			}
+			// Reset timer and allow resend if there was an error
+			setCanResend(true);
+			setResendTimer(0);
 		}
 	};
 
@@ -276,16 +302,26 @@ export default function VerifyEmail() {
 					</span>
 					<button
 						type="button"
-						className={getLinkStyles()}
-						onClick={() => {
-							// Handle resend verification email logic
-							handleResendCode();
-						}}
+						className={`${getLinkStyles()} ${
+							!canResend ? "opacity-50 cursor-not-allowed" : ""
+						}`}
+						onClick={handleResendCode}
+						disabled={!canResend}
 					>
-						{config.forms.verifyEmail.retryInText}
+						{canResend
+							? config.forms.verifyEmail.retryInText
+							: `Resend in ${resendTimer}s`}
 					</button>
 				</div>
 			</form>
 		</AuthFormLayout>
+	);
+}
+
+export default function VerifyEmail() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<VerifyEmailContent />
+		</Suspense>
 	);
 }

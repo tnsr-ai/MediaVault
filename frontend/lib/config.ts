@@ -57,10 +57,45 @@ export const config = {
 			submitButtonText: "Send Reset Link",
 			signInPrompt: "Remembered your password?",
 			signInText: "Sign in",
+			successTitle: "Check your email",
+			successDescription:
+				"We've sent password reset instructions to your email address.",
+			successPrompt:
+				"Didn't receive the email? Check your spam folder or try again.",
+			enterResetCodeText: "Enter Reset Code",
+			backToSignInText: "Back to Sign In",
 			fields: {
 				email: {
 					label: "Email Address",
 					placeholder: "Enter your email address",
+				},
+			},
+		},
+		resetPassword: {
+			title: "Reset Your Password",
+			description:
+				"Enter the reset code sent to your email and choose a new password.",
+			submitButtonText: "Reset Password",
+			loadingText: "Resetting Password...",
+			successTitle: "Password Reset Successful",
+			successDescription: "Your password has been successfully reset.",
+			successPrompt: "You can now sign in with your new password.",
+			signInText: "Sign In",
+			resendPrompt: "Didn't receive the code?",
+			resendText: "Request New Reset",
+			backToSignInText: "Back to Sign In",
+			fields: {
+				code: {
+					label: "Reset Code",
+					placeholder: "Enter 6-digit reset code",
+				},
+				newPassword: {
+					label: "New Password",
+					placeholder: "Enter new password",
+				},
+				confirmPassword: {
+					label: "Confirm New Password",
+					placeholder: "Confirm new password",
 				},
 			},
 		},

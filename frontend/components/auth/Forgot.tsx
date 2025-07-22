@@ -4,6 +4,7 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { config } from "@/lib/config";
+import { RESEND_TIMER_SECONDS } from "@/lib/constants/auth";
 import { getButtonStyles, getLinkStyles } from "@/lib/theme";
 import {
 	type ForgotPasswordFormData,
@@ -14,6 +15,7 @@ import {
 	getInputWithErrorStyles,
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPassword } from "aws-amplify/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,9 +24,11 @@ import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
 
 export default function Forgot() {
-	const _router = useRouter();
+	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [forgotError, setForgotError] = useState<string | null>(null);
+	const [userEmail, setUserEmail] = useState("");
 
 	const form = useForm<ForgotPasswordFormData>({
 		resolver: zodResolver(forgotPasswordSchema),
@@ -37,11 +41,45 @@ export default function Forgot() {
 
 	const onSubmit = createFormSubmitHandler<ForgotPasswordFormData>(
 		async (data) => {
-			// Handle forgot password logic here
-			console.log("Forgot password data:", data);
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			setIsSubmitted(true);
+			// Clear any previous errors
+			setForgotError(null);
+
+			try {
+				// Use AWS Cognito resetPassword
+				await resetPassword({
+					username: data.email,
+				});
+
+				// Store email for the confirmation step
+				setUserEmail(data.email);
+				setIsSubmitted(true);
+			} catch (error: unknown) {
+				// Handle forgot password errors
+				if (error instanceof Error && error.name === "UserNotFoundException") {
+					setForgotError(
+						"No account found with this email address. Please check your email or sign up.",
+					);
+				} else if (
+					error instanceof Error &&
+					error.name === "LimitExceededException"
+				) {
+					setForgotError(
+						"Too many password reset attempts. Please wait before trying again.",
+					);
+				} else if (
+					error instanceof Error &&
+					error.name === "InvalidParameterException"
+				) {
+					setForgotError(
+						"Invalid email format. Please enter a valid email address.",
+					);
+				} else {
+					setForgotError(
+						"An error occurred while sending the reset code. Please try again.",
+					);
+				}
+				throw error; // Re-throw to maintain existing error handling behavior
+			}
 		},
 		setIsLoading,
 	);
@@ -55,14 +93,29 @@ export default function Forgot() {
 	if (isSubmitted) {
 		return (
 			<AuthFormLayout
-				title="Check your email"
-				description="We've sent password reset instructions to your email address."
+				title={config.forms.forgotPassword.successTitle}
+				description={config.forms.forgotPassword.successDescription}
 				showDivider={false}
 			>
-				<div className="text-center">
-					<Link href="/" className={getLinkStyles()}>
-						Back to Sign In
-					</Link>
+				<div className="text-center space-y-4">
+					<p className="text-sm text-gray-600">
+						{config.forms.forgotPassword.successPrompt}
+					</p>
+					<div className="space-y-2">
+						<Link
+							href={`/forgot-password/confirm?email=${encodeURIComponent(
+								userEmail,
+							)}`}
+							className={`${getButtonStyles(
+								"primary",
+							)} w-full h-10 sm:h-12 font-medium tracking-tight inline-flex items-center justify-center`}
+						>
+							{config.forms.forgotPassword.enterResetCodeText}
+						</Link>
+						<Link href="/" className={getLinkStyles()}>
+							{config.forms.forgotPassword.backToSignInText}
+						</Link>
+					</div>
 				</div>
 			</AuthFormLayout>
 		);
@@ -77,6 +130,13 @@ export default function Forgot() {
 				className="space-y-4 sm:space-y-6"
 				onSubmit={handleSubmit(onSubmit)}
 			>
+				{/* Forgot Password Error Display */}
+				{forgotError && (
+					<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+						<p className="text-sm text-red-600">{forgotError}</p>
+					</div>
+				)}
+
 				<div className="space-y-1.5 sm:space-y-2">
 					<Label
 						htmlFor="email"

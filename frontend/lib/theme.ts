@@ -102,7 +102,7 @@ export const getButtonStyles = (
 	variant: "primary" | "secondary" = "primary",
 ) => {
 	const btn = theme.colors.button[variant];
-	return `${btn.background} ${btn.hover} ${btn.text} ${theme.animations.transition}`;
+	return `${btn.background} ${btn.hover} ${btn.text} ${theme.animations.transition} rounded-md`;
 };
 
 export const getInputStyles = () => {
