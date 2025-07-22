@@ -15,6 +15,7 @@ import {
 	getInputWithErrorStyles,
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -24,6 +25,8 @@ export default function UpdatePassword() {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [success, setSuccess] = useState("");
+	const [showNewPassword, setShowNewPassword] = useState(false);
+	const [showRetypePassword, setShowRetypePassword] = useState(false);
 
 	const form = useForm<UpdatePasswordFormData>({
 		resolver: zodResolver(updatePasswordSchema),
@@ -71,17 +74,27 @@ export default function UpdatePassword() {
 					<Label htmlFor="new-password" className={theme.typography.label}>
 						{"New Password"}
 					</Label>
-					<Input
-						id="new-password"
-						type="password"
-						placeholder={"Enter new password"}
-						className={getInputWithErrorStyles(errors.newPassword)}
-						{...register("newPassword")}
-						aria-invalid={!!errors.newPassword}
-						aria-describedby={
-							errors.newPassword ? "newPassword-error" : undefined
-						}
-					/>
+					<div className="relative">
+						<Input
+							id="new-password"
+							type={showNewPassword ? "text" : "password"}
+							placeholder={"Enter new password"}
+							className={getInputWithErrorStyles(errors.newPassword)}
+							{...register("newPassword")}
+							aria-invalid={!!errors.newPassword}
+							aria-describedby={
+								errors.newPassword ? "newPassword-error" : undefined
+							}
+						/>
+						<button
+							type="button"
+							onClick={() => setShowNewPassword(!showNewPassword)}
+							className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+							aria-label={showNewPassword ? "Hide password" : "Show password"}
+						>
+							{showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+						</button>
+					</div>
 					<FormError error={errors.newPassword} id="newPassword-error" />
 
 					{/* Password Strength Indicator */}
@@ -99,17 +112,29 @@ export default function UpdatePassword() {
 					<Label htmlFor="retype-password" className={theme.typography.label}>
 						{"Retype Password"}
 					</Label>
-					<Input
-						id="retype-password"
-						type="password"
-						placeholder={"Retype new password"}
-						className={getInputWithErrorStyles(errors.retypePassword)}
-						{...register("retypePassword")}
-						aria-invalid={!!errors.retypePassword}
-						aria-describedby={
-							errors.retypePassword ? "retypePassword-error" : undefined
-						}
-					/>
+					<div className="relative">
+						<Input
+							id="retype-password"
+							type={showRetypePassword ? "text" : "password"}
+							placeholder={"Retype new password"}
+							className={getInputWithErrorStyles(errors.retypePassword)}
+							{...register("retypePassword")}
+							aria-invalid={!!errors.retypePassword}
+							aria-describedby={
+								errors.retypePassword ? "retypePassword-error" : undefined
+							}
+						/>
+						<button
+							type="button"
+							onClick={() => setShowRetypePassword(!showRetypePassword)}
+							className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+							aria-label={
+								showRetypePassword ? "Hide password" : "Show password"
+							}
+						>
+							{showRetypePassword ? <EyeOff size={20} /> : <Eye size={20} />}
+						</button>
+					</div>
 					<FormError error={errors.retypePassword} id="retypePassword-error" />
 				</div>
 				{success && (

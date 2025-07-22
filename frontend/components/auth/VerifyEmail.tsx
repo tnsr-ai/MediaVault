@@ -33,6 +33,7 @@ export default function VerifyEmail() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
+	const [verifyError, setVerifyError] = useState<string | null>(null);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 	// Get email from query params if available
@@ -62,26 +63,65 @@ export default function VerifyEmail() {
 
 	const onSubmit = createFormSubmitHandler<VerifyEmailFormData>(
 		async (data) => {
-			// Use AWS Cognito confirmSignUp
-			await confirmSignUp({
-				username: email,
-				confirmationCode: data.code,
-			});
+			// Clear any previous verification errors
+			setVerifyError(null);
 
-			// Navigate to login page after successful verification
-			router.push("/");
+			try {
+				// Use AWS Cognito confirmSignUp
+				await confirmSignUp({
+					username: email,
+					confirmationCode: data.code,
+				});
+
+				// Navigate to login page after successful verification
+				router.push("/");
+			} catch (error: unknown) {
+				// Handle verification errors
+				if (error instanceof Error && error.name === "CodeMismatchException") {
+					setVerifyError(
+						"Invalid verification code. Please check your code and try again.",
+					);
+				} else if (
+					error instanceof Error &&
+					error.name === "ExpiredCodeException"
+				) {
+					setVerifyError(
+						"Verification code has expired. Please request a new code.",
+					);
+				} else if (
+					error instanceof Error &&
+					error.name === "LimitExceededException"
+				) {
+					setVerifyError("Too many attempts. Please wait before trying again.");
+				} else {
+					setVerifyError(
+						"An error occurred during verification. Please try again.",
+					);
+				}
+				throw error; // Re-throw to maintain existing error handling behavior
+			}
 		},
 		setIsLoading,
 	);
 
 	const handleResendCode = async () => {
+		// Clear any previous errors
+		setVerifyError(null);
+
 		try {
 			await resendSignUpCode({
 				username: email,
 			});
 			// You might want to show a success message to the user
-		} catch (error) {
-			// Handle error appropriately (show error message to user)
+		} catch (error: unknown) {
+			// Handle resend errors
+			if (error instanceof Error && error.name === "LimitExceededException") {
+				setVerifyError(
+					"Too many resend attempts. Please wait before requesting another code.",
+				);
+			} else {
+				setVerifyError("Failed to resend verification code. Please try again.");
+			}
 		}
 	};
 
@@ -174,6 +214,13 @@ export default function VerifyEmail() {
 				className={theme.components.form.spacing}
 				onSubmit={handleSubmit(onSubmit)}
 			>
+				{/* Verification Error Display */}
+				{verifyError && (
+					<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+						<p className="text-sm text-red-600">{verifyError}</p>
+					</div>
+				)}
+
 				<div className={theme.components.form.fieldSpacing}>
 					<Label htmlFor="code-0" className={theme.typography.label}>
 						{config.forms.verifyEmail.fields.code.label}

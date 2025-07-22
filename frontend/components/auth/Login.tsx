@@ -12,6 +12,7 @@ import {
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "aws-amplify/auth";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,6 +23,8 @@ import AuthFormLayout from "./AuthFormLayout";
 export default function Login() {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
+	const [loginError, setLoginError] = useState<string | null>(null);
+	const [showPassword, setShowPassword] = useState(false);
 
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
@@ -34,24 +37,58 @@ export default function Login() {
 	});
 
 	const onSubmit = createFormSubmitHandler<LoginFormData>(async (data) => {
-		// Use AWS Cognito signIn
-		const { isSignedIn, nextStep } = await signIn({
-			username: data.email,
-			password: data.password,
-		});
+		// Clear any previous login errors
+		setLoginError(null);
 
-		if (isSignedIn) {
-			// User is successfully signed in
-			router.push("/dashboard"); // Redirect to your main app
-		} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
-			// User needs to verify their email
-			router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
-		} else if (nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE") {
-			// 2FA is required
-			router.push("/2fa");
-		} else {
-			// Handle other nextStep cases as needed
-			// You may want to show appropriate UI based on nextStep
+		try {
+			// Use AWS Cognito signIn
+			const { isSignedIn, nextStep } = await signIn({
+				username: data.email,
+				password: data.password,
+			});
+
+			if (isSignedIn) {
+				// User is successfully signed in
+				router.push("/dashboard"); // Redirect to your main app
+			} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
+				// User needs to verify their email
+				router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+			} else if (nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE") {
+				// 2FA is required
+				router.push("/2fa");
+			} else {
+				// Handle other nextStep cases as needed
+				// You may want to show appropriate UI based on nextStep
+			}
+		} catch (error: unknown) {
+			// Handle authentication errors
+			if (
+				error instanceof Error &&
+				(error.name === "NotAuthorizedException" ||
+					error.name === "UserNotFoundException")
+			) {
+				setLoginError("Invalid email or password. Please try again.");
+			} else if (
+				error instanceof Error &&
+				error.name === "UserNotConfirmedException"
+			) {
+				setLoginError("Please verify your email before signing in.");
+				// Optionally redirect to verify email page
+				router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+			} else if (
+				error instanceof Error &&
+				error.name === "TooManyRequestsException"
+			) {
+				setLoginError("Too many failed attempts. Please try again later.");
+			} else if (
+				error instanceof Error &&
+				error.name === "UserAlreadyAuthenticatedException"
+			) {
+				setLoginError("You are already signed in. Please log out first.");
+			} else {
+				setLoginError("An error occurred during sign in. Please try again.");
+			}
+			throw error; // Re-throw to maintain existing error handling behavior
 		}
 	}, setIsLoading);
 
@@ -70,6 +107,13 @@ export default function Login() {
 				className={theme.components.form.spacing}
 				onSubmit={handleSubmit(onSubmit)}
 			>
+				{/* Login Error Display */}
+				{loginError && (
+					<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+						<p className="text-sm text-red-600">{loginError}</p>
+					</div>
+				)}
+
 				<div className={theme.components.form.fieldSpacing}>
 					<Label htmlFor="email" className={theme.typography.label}>
 						Email
@@ -97,15 +141,29 @@ export default function Login() {
 							</Link>
 						)}
 					</div>
-					<Input
-						id="password"
-						type="password"
-						placeholder="Enter your password"
-						className={getInputWithErrorStyles(errors.password)}
-						{...register("password")}
-						aria-invalid={!!errors.password}
-						aria-describedby={errors.password ? "password-error" : undefined}
-					/>
+					<div className="relative">
+						<Input
+							id="password"
+							type={showPassword ? "text" : "password"}
+							placeholder="Enter your password"
+							className={getInputWithErrorStyles(errors.password)}
+							{...register("password")}
+							aria-invalid={!!errors.password}
+							aria-describedby={errors.password ? "password-error" : undefined}
+						/>
+						<button
+							type="button"
+							className="absolute inset-y-0 right-0 pr-3 flex items-center"
+							onClick={() => setShowPassword(!showPassword)}
+							aria-label={showPassword ? "Hide password" : "Show password"}
+						>
+							{showPassword ? (
+								<EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+							) : (
+								<Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+							)}
+						</button>
+					</div>
 					<FormError error={errors.password} id="password-error" />
 				</div>
 				<Button
