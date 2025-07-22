@@ -12,6 +12,7 @@ import {
 	getInputWithErrorStyles,
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signUp } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -36,11 +37,28 @@ export default function Signup() {
 	});
 
 	const onSubmit = createFormSubmitHandler<SignupFormData>(async (data) => {
-		// Handle signup logic here
-		console.log("Signup data:", data);
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		router.push("/verify-email");
+		try {
+			// Use AWS Cognito signUp
+			const { userId } = await signUp({
+				username: data.email,
+				password: data.password,
+				options: {
+					userAttributes: {
+						email: data.email,
+						given_name: data.firstName,
+						family_name: data.lastName,
+					},
+				},
+			});
+
+			// Redirect to email verification page with email parameter
+			router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+		} catch (error) {
+			// Handle specific error cases
+			if (error instanceof Error) {
+				throw error;
+			}
+		}
 	}, setIsLoading);
 
 	const {

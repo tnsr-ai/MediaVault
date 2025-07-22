@@ -1,3 +1,4 @@
+import ConfigureAmplify from "@/components/ConfigureAmplify";
 import type { Metadata } from "next";
 import { Nunito_Sans } from "next/font/google";
 import "./globals.css";
@@ -20,6 +21,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className="h-full">
 			<body className={`${nunito.variable} antialiased h-full font-sans`}>
+				<ConfigureAmplify />
 				<div className="w-full h-full p-5">{children}</div>
 			</body>
 		</html>

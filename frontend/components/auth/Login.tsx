@@ -11,6 +11,7 @@ import {
 	getInputWithErrorStyles,
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "aws-amplify/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -33,11 +34,25 @@ export default function Login() {
 	});
 
 	const onSubmit = createFormSubmitHandler<LoginFormData>(async (data) => {
-		// Handle login logic here
-		console.log("Login data:", data);
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		router.push("/2fa");
+		// Use AWS Cognito signIn
+		const { isSignedIn, nextStep } = await signIn({
+			username: data.email,
+			password: data.password,
+		});
+
+		if (isSignedIn) {
+			// User is successfully signed in
+			router.push("/dashboard"); // Redirect to your main app
+		} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
+			// User needs to verify their email
+			router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+		} else if (nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE") {
+			// 2FA is required
+			router.push("/2fa");
+		} else {
+			// Handle other nextStep cases as needed
+			// You may want to show appropriate UI based on nextStep
+		}
 	}, setIsLoading);
 
 	const {

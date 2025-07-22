@@ -14,7 +14,8 @@ import {
 	getInputWithErrorStyles,
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { confirmSignUp, resendSignUpCode } from "aws-amplify/auth";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import AuthBottomLink from "./AuthBottomLink";
@@ -30,8 +31,12 @@ const CODE_INPUTS = Array.from({ length: CODE_LENGTH }, (_, i) => ({
 
 export default function VerifyEmail() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+	// Get email from query params if available
+	const email = searchParams.get("email") || "";
 
 	const _form = useForm<VerifyEmailFormData>({
 		resolver: zodResolver(verifyEmailSchema),
@@ -57,14 +62,28 @@ export default function VerifyEmail() {
 
 	const onSubmit = createFormSubmitHandler<VerifyEmailFormData>(
 		async (data) => {
-			// Handle email verification logic here
-			console.log("Verify email data:", data);
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			router.push("/"); // Navigate to login or dashboard
+			// Use AWS Cognito confirmSignUp
+			await confirmSignUp({
+				username: email,
+				confirmationCode: data.code,
+			});
+
+			// Navigate to login page after successful verification
+			router.push("/");
 		},
 		setIsLoading,
 	);
+
+	const handleResendCode = async () => {
+		try {
+			await resendSignUpCode({
+				username: email,
+			});
+			// You might want to show a success message to the user
+		} catch (error) {
+			// Handle error appropriately (show error message to user)
+		}
+	};
 
 	const handleInput = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
 		let value = e.target.value;
@@ -175,8 +194,8 @@ export default function VerifyEmail() {
 						type="button"
 						className={getLinkStyles()}
 						onClick={() => {
-							// Handle resend verification email logic here
-							console.log("Resending verification email...");
+							// Handle resend verification email logic
+							handleResendCode();
 						}}
 					>
 						{config.forms.verifyEmail.retryInText}
