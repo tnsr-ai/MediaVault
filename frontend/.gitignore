@@ -43,3 +43,8 @@ next-env.d.ts
 # venv
 .venv/
 venv/
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
