@@ -46,7 +46,6 @@ export default function TwoFA() {
 
 	const onSubmit = createFormSubmitHandler<TwoFAFormData>(async (data) => {
 		// Handle 2FA verification logic here
-		console.log("2FA data:", data);
 		// Simulate API call
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 		router.push("/dashboard"); // Navigate to dashboard or main app
@@ -56,6 +55,21 @@ export default function TwoFA() {
 		let value = e.target.value;
 		// Remove non-digit characters
 		value = value.replace(/\D/g, "");
+
+		// Handle pasted content (multiple digits)
+		if (value.length > 1) {
+			// This is likely a paste operation
+			const pastedDigits = value.substring(0, 6);
+			setValue("code", pastedDigits);
+
+			// Focus the last filled input or the next empty input
+			const targetIndex = Math.min(pastedDigits.length - 1, 5);
+			if (inputRefs.current[targetIndex]) {
+				inputRefs.current[targetIndex]?.focus();
+			}
+			return;
+		}
+
 		e.target.value = value;
 
 		// Update the form field with the complete code
@@ -71,10 +85,31 @@ export default function TwoFA() {
 		}
 	};
 
+	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+		e.preventDefault();
+		const pastedData = e.clipboardData.getData("text").replace(/\D/g, "");
+
+		if (pastedData.length > 0) {
+			const digits = pastedData.substring(0, 6);
+			setValue("code", digits);
+
+			// Focus the last filled input or the next empty input
+			const targetIndex = Math.min(digits.length - 1, 5);
+			if (inputRefs.current[targetIndex]) {
+				inputRefs.current[targetIndex]?.focus();
+			}
+		}
+	};
+
 	const handleKeyDown = (
 		e: React.KeyboardEvent<HTMLInputElement>,
 		idx: number,
 	) => {
+		// Allow Ctrl+V for paste
+		if (e.ctrlKey && e.key === "v") {
+			return;
+		}
+
 		// Prevent non-digit keys except Backspace, Tab, Arrow keys
 		if (
 			!/^[0-9]$/.test(e.key) &&
@@ -132,6 +167,7 @@ export default function TwoFA() {
 									onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
 										handleKeyDown(e, idx)
 									}
+									onPaste={handlePaste}
 									aria-label={`Digit ${idx + 1} of verification code`}
 									aria-invalid={!!errors.code}
 									aria-describedby={errors.code ? "code-error" : undefined}
