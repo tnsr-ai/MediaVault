@@ -19,6 +19,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
+import GoogleSignInButton from "./GoogleSignInButton";
+import OrDivider from "./OrDivider";
 
 export default function Login() {
 	const router = useRouter();
@@ -175,6 +177,11 @@ export default function Login() {
 				>
 					{isLoading ? "Signing in..." : config.forms.login.submitButtonText}
 				</Button>
+
+				<OrDivider />
+
+				{/* Google Sign-In Button */}
+				<GoogleSignInButton text="Sign in with Google" disabled={isLoading} />
 
 				{config.features.showSignUpLink && (
 					<AuthBottomLink

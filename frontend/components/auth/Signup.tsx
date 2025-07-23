@@ -19,6 +19,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
+import GoogleSignInButton from "./GoogleSignInButton";
+import OrDivider from "./OrDivider";
 
 export default function Signup() {
 	const router = useRouter();
@@ -98,7 +100,7 @@ export default function Signup() {
 	return (
 		<AuthFormLayout
 			title={config.forms.signup.title}
-			description={config.forms.signup.description}
+			description={config.app.description}
 		>
 			<form
 				className={theme.components.form.spacing}
@@ -254,6 +256,11 @@ export default function Signup() {
 						? "Creating account..."
 						: config.forms.signup.submitButtonText}
 				</Button>
+
+				<OrDivider />
+
+				{/* Google Sign-In Button */}
+				<GoogleSignInButton text="Sign up with Google" disabled={isLoading} />
 
 				<AuthBottomLink
 					prompt={config.forms.signup.signInPrompt}
