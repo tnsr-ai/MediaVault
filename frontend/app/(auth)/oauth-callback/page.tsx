@@ -21,34 +21,32 @@ export default function OAuthCallback() {
 			switch (payload.event) {
 				case "signInWithRedirect":
 					try {
-						const user = await getCurrentUser();
-						const userAttributes = await fetchUserAttributes();
+						await getCurrentUser();
+						await fetchUserAttributes();
 
-						console.log("OAuth sign-in successful:", { user, userAttributes });
-
-						// Redirect to dashboard or main app
+						// OAuth users are authenticated via external provider
+						// Redirect to dashboard
 						router.push("/dashboard");
 					} catch (error) {
-						console.error("Error getting user after OAuth:", error);
+						console.error("Error completing OAuth sign-in:", error);
 						setError("Failed to complete sign-in. Please try again.");
 						setIsLoading(false);
 					}
 					break;
 
 				case "signInWithRedirect_failure":
-					console.error("OAuth sign-in failed:", payload.data);
 					setError("Sign-in failed. Please try again.");
 					setIsLoading(false);
 					break;
 
 				case "customOAuthState": {
-					const state = payload.data;
-					console.log("Custom OAuth state received:", state);
+					// Handle custom OAuth state if needed
 					break;
 				}
 
 				default:
-					console.log("Unhandled auth event:", payload.event);
+					// Unhandled auth event
+					break;
 			}
 		});
 
