@@ -20,9 +20,9 @@ export const auth = defineAuth({
 			},
 			callbackUrls: [
 				"http://localhost:3000/oauth-callback",
-				"https://yourdomain.com/oauth-callback",
+				"https://dev-mediavault.tnsr.ai/oauth-callback",
 			],
-			logoutUrls: ["http://localhost:3000/", "https://yourdomain.com/"],
+			logoutUrls: ["http://localhost:3000/", "https://dev-mediavault.tnsr.ai/"],
 		},
 	},
 	userAttributes: {
