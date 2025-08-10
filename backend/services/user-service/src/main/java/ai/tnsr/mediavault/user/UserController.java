@@ -1,6 +1,7 @@
 package ai.tnsr.mediavault.user;
 
 import ai.tnsr.mediavault.user.dto.CognitoUserSignupRequest;
+import ai.tnsr.mediavault.user.dto.UpdateStorageRequest;
 import ai.tnsr.mediavault.user.dto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -187,5 +188,107 @@ public class UserController {
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("User service is running");
+    }
+
+    @Operation(
+        summary = "Update user storage usage",
+        description = "Updates the storage used by a specific user. Validates that the new usage doesn't exceed the user's storage quota.",
+        tags = {"User Management"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Storage updated successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "cognitoUserId": "us-east-1:12345678-1234-1234-1234-123456789012",
+                        "firstName": "John",
+                        "lastName": "Doe",
+                        "email": "john.doe@example.com",
+                        "message": "User created successfully"
+                    }
+                    """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "User not found",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "message": "User not found"
+                    }
+                    """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Storage exceeds quota or invalid request",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "message": "Storage usage exceeds quota limit"
+                    }
+                    """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error"
+        )
+    })
+    @PutMapping("/cognito/{cognitoUserId}/storage")
+    public ResponseEntity<UserResponse> updateUserStorage(
+        @Parameter(
+            description = "AWS Cognito User ID (sub claim from JWT)",
+            required = true,
+            example = "us-east-1:12345678-1234-1234-1234-123456789012"
+        )
+        @PathVariable String cognitoUserId,
+        @Parameter(
+            description = "Storage usage update data",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UpdateStorageRequest.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "storageUsedBytes": 1073741824
+                    }
+                    """
+                )
+            )
+        )
+        @Valid @RequestBody UpdateStorageRequest request) {
+        try {
+            UserResponse response = userService.updateUserStorage(cognitoUserId, request.getStorageUsedBytes());
+
+            if (response.getId() != null) {
+                return ResponseEntity.ok(response);
+            } else if (response.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            } else {
+                // Storage exceeds quota or other validation error
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new UserResponse("Failed to update storage: " + e.getMessage()));
+        }
     }
 }

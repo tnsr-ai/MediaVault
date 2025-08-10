@@ -55,4 +55,27 @@ public class UserService {
             ))
             .orElse(new UserResponse("User not found"));
     }
+
+    @Transactional
+    public UserResponse updateUserStorage(String cognitoUserId, Long storageUsedBytes) {
+        return userRepository.findByCognitoUserId(cognitoUserId)
+            .map(user -> {
+                // Check if the new storage usage exceeds quota
+                if (storageUsedBytes > user.getStorageQuotaBytes()) {
+                    return new UserResponse("Storage usage exceeds quota limit");
+                }
+
+                user.setStorageUsedBytes(storageUsedBytes);
+                User updatedUser = userRepository.save(user);
+
+                return new UserResponse(
+                    updatedUser.getId(),
+                    updatedUser.getCognitoUserId(),
+                    updatedUser.getFirstName(),
+                    updatedUser.getLastName(),
+                    updatedUser.getEmail()
+                );
+            })
+            .orElse(new UserResponse("User not found"));
+    }
 }
