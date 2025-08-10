@@ -3,6 +3,7 @@ package ai.tnsr.mediavault.user;
 import ai.tnsr.mediavault.user.dto.CognitoUserSignupRequest;
 import ai.tnsr.mediavault.user.dto.UserResponse;
 import ai.tnsr.mediavault.user.model.User;
+import ai.tnsr.mediavault.user.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
     @Transactional
     public UserResponse createUserFromCognito(CognitoUserSignupRequest request) {
@@ -77,5 +81,17 @@ public class UserService {
                 );
             })
             .orElse(new UserResponse("User not found"));
+    }
+
+    // New JWT-based methods
+    public UserResponse getCurrentUser() {
+        String cognitoUserId = jwtService.getCurrentUserCognitoId();
+        return getUserByCognitoId(cognitoUserId);
+    }
+
+    @Transactional
+    public UserResponse updateCurrentUserStorage(Long storageUsedBytes) {
+        String cognitoUserId = jwtService.getCurrentUserCognitoId();
+        return updateUserStorage(cognitoUserId, storageUsedBytes);
     }
 }

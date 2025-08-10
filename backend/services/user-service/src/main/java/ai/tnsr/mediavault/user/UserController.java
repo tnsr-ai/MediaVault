@@ -1,6 +1,5 @@
 package ai.tnsr.mediavault.user;
 
-import ai.tnsr.mediavault.user.dto.CognitoUserSignupRequest;
 import ai.tnsr.mediavault.user.dto.UpdateStorageRequest;
 import ai.tnsr.mediavault.user.dto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,26 +15,28 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
-@Tag(name = "User Management", description = "APIs for managing users in MediaVault platform")
+@Tag(name = "User Management", description = "Secure JWT-based APIs for managing users in MediaVault platform")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @Operation(
-        summary = "Create user from AWS Cognito signup",
-        description = "This endpoint is called by AWS Lambda when a user completes signup in Cognito. It creates a corresponding user record in the MediaVault database.",
-        tags = {"User Management"}
+        summary = "Get current user profile",
+        description = "Retrieves the profile of the currently authenticated user based on JWT token. The user ID is extracted from the JWT 'sub' claim.",
+        tags = {"User Management"},
+        security = @SecurityRequirement(name = "bearer-jwt")
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "201",
-            description = "User created successfully",
+            responseCode = "200",
+            description = "User profile retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = UserResponse.class),
@@ -46,124 +47,38 @@ public class UserController {
                         "cognitoUserId": "us-east-1:12345678-1234-1234-1234-123456789012",
                         "firstName": "John",
                         "lastName": "Doe",
-                        "email": "john.doe@example.com",
-                        "message": "User created successfully"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409",
-            description = "User already exists",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "message": "User with this Cognito ID already exists"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid request data"
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error"
-        )
-    })
-    @PostMapping("/cognito-signup")
-    public ResponseEntity<UserResponse> createUserFromCognito(
-        @Parameter(
-            description = "User signup data from AWS Cognito",
-            required = true,
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = CognitoUserSignupRequest.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "cognito_user_id": "us-east-1:12345678-1234-1234-1234-123456789012",
-                        "first_name": "John",
-                        "last_name": "Doe",
                         "email": "john.doe@example.com"
                     }
                     """
                 )
             )
-        )
-        @Valid @RequestBody CognitoUserSignupRequest request) {
-        try {
-            UserResponse response = userService.createUserFromCognito(request);
-
-            // Check if creation was successful by looking at the response
-            if (response.getId() != null) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            } else {
-                // User already exists or validation failed
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new UserResponse("Failed to create user: " + e.getMessage()));
-        }
-    }
-
-    @Operation(
-        summary = "Get user by Cognito User ID",
-        description = "Retrieves user information using their AWS Cognito User ID (sub claim from JWT)",
-        tags = {"User Management"}
-    )
-    @ApiResponses(value = {
+        ),
         @ApiResponse(
-            responseCode = "200",
-            description = "User found successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class)
-            )
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
         ),
         @ApiResponse(
             responseCode = "404",
-            description = "User not found",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "message": "User not found"
-                    }
-                    """
-                )
-            )
+            description = "User not found in database"
         ),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error"
         )
     })
-    @GetMapping("/cognito/{cognitoUserId}")
-    public ResponseEntity<UserResponse> getUserByCognitoId(
-        @Parameter(
-            description = "AWS Cognito User ID (sub claim from JWT)",
-            required = true,
-            example = "us-east-1:12345678-1234-1234-1234-123456789012"
-        )
-        @PathVariable String cognitoUserId) {
+    @GetMapping("/users/me")
+    public ResponseEntity<UserResponse> getCurrentUser() {
         try {
-            UserResponse response = userService.getUserByCognitoId(cognitoUserId);
+            UserResponse response = userService.getCurrentUser();
 
             if (response.getId() != null) {
                 return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new UserResponse("Unauthorized: " + e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new UserResponse("Failed to retrieve user: " + e.getMessage()));
@@ -171,29 +86,10 @@ public class UserController {
     }
 
     @Operation(
-        summary = "Health check",
-        description = "Simple health check endpoint to verify if the user service is running",
-        tags = {"User Management"}
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Service is healthy",
-            content = @Content(
-                mediaType = "text/plain",
-                examples = @ExampleObject(value = "User service is running")
-            )
-        )
-    })
-    @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("User service is running");
-    }
-
-    @Operation(
-        summary = "Update user storage usage",
-        description = "Updates the storage used by a specific user. Validates that the new usage doesn't exceed the user's storage quota.",
-        tags = {"User Management"}
+        summary = "Update current user's storage usage",
+        description = "Updates the storage usage for the currently authenticated user. Called by media-service after file uploads. User ID is extracted from JWT token.",
+        tags = {"User Management"},
+        security = @SecurityRequirement(name = "bearer-jwt")
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -217,21 +113,6 @@ public class UserController {
             )
         ),
         @ApiResponse(
-            responseCode = "404",
-            description = "User not found",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "message": "User not found"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
             responseCode = "400",
             description = "Storage exceeds quota or invalid request",
             content = @Content(
@@ -247,18 +128,20 @@ public class UserController {
             )
         ),
         @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "User not found in database"
+        ),
+        @ApiResponse(
             responseCode = "500",
             description = "Internal server error"
         )
     })
-    @PutMapping("/cognito/{cognitoUserId}/storage")
-    public ResponseEntity<UserResponse> updateUserStorage(
-        @Parameter(
-            description = "AWS Cognito User ID (sub claim from JWT)",
-            required = true,
-            example = "us-east-1:12345678-1234-1234-1234-123456789012"
-        )
-        @PathVariable String cognitoUserId,
+    @PutMapping("/users/me/storage")
+    public ResponseEntity<UserResponse> updateCurrentUserStorage(
         @Parameter(
             description = "Storage usage update data",
             required = true,
@@ -276,16 +159,18 @@ public class UserController {
         )
         @Valid @RequestBody UpdateStorageRequest request) {
         try {
-            UserResponse response = userService.updateUserStorage(cognitoUserId, request.getStorageUsedBytes());
+            UserResponse response = userService.updateCurrentUserStorage(request.getStorageUsedBytes());
 
             if (response.getId() != null) {
                 return ResponseEntity.ok(response);
             } else if (response.getMessage().contains("not found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             } else {
-                // Storage exceeds quota or other validation error
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new UserResponse("Unauthorized: " + e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new UserResponse("Failed to update storage: " + e.getMessage()));
