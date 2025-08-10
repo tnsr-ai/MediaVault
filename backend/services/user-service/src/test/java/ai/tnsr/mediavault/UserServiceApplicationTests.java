@@ -1,10 +1,10 @@
-package ai.tnsr.api_gateway;
+package ai.tnsr.mediavault;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiGatewayApplicationTests {
+class UserServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

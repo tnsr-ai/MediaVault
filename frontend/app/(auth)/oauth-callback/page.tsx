@@ -76,7 +76,7 @@ export default function OAuthCallback() {
 						<p className="text-sm text-red-600">{error}</p>
 					</div>
 					<Button
-						onClick={() => router.push("/login")}
+						onClick={() => router.push("/")}
 						className="w-full"
 						variant="outline"
 					>
