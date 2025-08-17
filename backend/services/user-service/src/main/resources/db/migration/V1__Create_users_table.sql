@@ -1,7 +1,9 @@
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create users table
+CREATE SCHEMA IF NOT EXISTS user_schema;
+
+SET search_path = user_schema, public;
+
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cognito_user_id VARCHAR(255) NOT NULL UNIQUE,
@@ -14,12 +16,12 @@ CREATE TABLE users (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Add comments
+
 COMMENT ON COLUMN users.cognito_user_id IS 'The sub claim from the Cognito JWT';
 COMMENT ON COLUMN users.storage_quota_bytes IS 'Storage quota in bytes (default 10 GB)';
 COMMENT ON COLUMN users.storage_used_bytes IS 'Current storage usage in bytes';
 
--- Create indexes for better performance
+
 CREATE INDEX idx_users_cognito_user_id ON users(cognito_user_id);
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_created_at ON users(created_at);
