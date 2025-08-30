@@ -4,6 +4,7 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength-indicator";
+import { userApi } from "@/lib/api/user";
 import { config } from "@/lib/config";
 import { getButtonStyles, theme } from "@/lib/theme";
 import { type SignupFormData, signupSchema } from "@/lib/validations/auth";
@@ -59,6 +60,21 @@ export default function Signup() {
 					},
 				},
 			});
+
+			// Sync user data with backend if userId is available
+			if (userId) {
+				try {
+					await userApi.syncUser({
+						cognito_user_id: userId,
+						first_name: data.firstName,
+						last_name: data.lastName,
+						email: data.email,
+					});
+					console.log("User successfully synced with backend");
+				} catch (syncError) {
+					console.error("Failed to sync user with backend:", syncError);
+				}
+			}
 
 			// Redirect to email verification page with email parameter
 			router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
