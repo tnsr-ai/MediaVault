@@ -44,7 +44,8 @@ function VerifyEmailContent() {
 
 	// Get user data from query params
 	const dataParam = searchParams.get("data");
-	const emailParam = searchParams.get("email"); // Fallback for old URLs
+	const emailParam = searchParams.get("email"); // Fallback for old URLs or login redirects
+	const sourceParam = searchParams.get("source"); // Track source (login, signup)
 
 	// Parse user data or use email fallback
 	let userData: {
@@ -56,18 +57,38 @@ function VerifyEmailContent() {
 	} | null = null;
 
 	let email = "";
+	let isFromSignup = false; // Track if user came from signup or login
 
 	if (dataParam) {
+		// User came from signup flow with full data
 		try {
 			userData = JSON.parse(atob(dataParam));
 			email = userData?.email || "";
+			isFromSignup = true;
 		} catch (error) {
 			console.error("Failed to parse user data from URL:", error);
 			email = emailParam || "";
+			isFromSignup = sourceParam !== "login"; // Default to signup unless explicitly from login
 		}
 	} else {
+		// User came from login flow with only email, or direct access
 		email = emailParam || "";
+		isFromSignup = sourceParam !== "login"; // If source=login, it's from login flow
 	}
+
+	// Initialize hooks unconditionally (before any early returns)
+	const {
+		formState: { errors },
+		handleSubmit,
+		setValue,
+		watch,
+	} = useForm<VerifyEmailFormData>({
+		resolver: zodResolver(verifyEmailSchema),
+		defaultValues: {
+			code: "",
+		},
+	});
+	const codeValue = watch("code");
 
 	// Timer effect for resend functionality
 	useEffect(() => {
@@ -90,18 +111,43 @@ function VerifyEmailContent() {
 		};
 	}, [resendTimer]);
 
-	const {
-		formState: { errors },
-		handleSubmit,
-		setValue,
-		watch,
-	} = useForm<VerifyEmailFormData>({
-		resolver: zodResolver(verifyEmailSchema),
-		defaultValues: {
-			code: "",
-		},
-	});
-	const codeValue = watch("code");
+	// Redirect to login if no email is provided
+	useEffect(() => {
+		if (!email) {
+			console.error("No email provided for verification");
+			// Small delay to show error before redirect
+			const timeout = setTimeout(() => {
+				router.push("/?error=missing-email");
+			}, 2000);
+			return () => clearTimeout(timeout);
+		}
+	}, [email, router]);
+
+	// Show error state if no email is provided
+	if (!email) {
+		return (
+			<AuthFormLayout
+				title="Verification Error"
+				description="Unable to verify email - missing required information."
+			>
+				<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+					<p className="text-sm text-red-600">
+						No email address provided for verification. Redirecting you back to
+						the login page...
+					</p>
+				</div>
+				<div className="text-center">
+					<button
+						type="button"
+						onClick={() => router.push("/")}
+						className={`${getButtonStyles()} w-full`}
+					>
+						Go to Login
+					</button>
+				</div>
+			</AuthFormLayout>
+		);
+	}
 
 	const onSubmit = createFormSubmitHandler<VerifyEmailFormData>(
 		async (data) => {
@@ -115,8 +161,8 @@ function VerifyEmailContent() {
 					confirmationCode: data.code,
 				});
 
-				// After successful verification, sync user with backend
-				if (userData) {
+				// After successful verification, sync user with backend (only for signup flow)
+				if (userData && isFromSignup) {
 					try {
 						await userApi.syncUser({
 							cognito_user_id: userData.userId,
@@ -135,12 +181,15 @@ function VerifyEmailContent() {
 						// Don't fail the verification process if backend sync fails
 						// The user is still verified and can proceed to login
 					}
+				} else if (!isFromSignup) {
+					console.log("User verified from login flow - skipping backend sync");
 				} else {
 					console.warn("No user data available for sync after verification");
 				}
 
-				// Auto-login user after successful verification if password is available
-				if (userData?.password) {
+				// Handle post-verification flow based on how user got here
+				if (isFromSignup && userData?.password) {
+					// User came from signup - attempt auto-login
 					try {
 						const { isSignedIn } = await signIn({
 							username: email,
@@ -159,6 +208,11 @@ function VerifyEmailContent() {
 						router.push("/?verified=true");
 						return;
 					}
+				} else {
+					// User came from login flow - redirect back to login with success message
+					console.log("User verified from login flow - redirecting to login");
+					router.push("/?verified=true");
+					return;
 				}
 
 				// Fallback: redirect to login with verification success message
@@ -304,8 +358,22 @@ function VerifyEmailContent() {
 	return (
 		<AuthFormLayout
 			title={config.forms.verifyEmail.title}
-			description={config.forms.verifyEmail.description}
+			description={
+				isFromSignup
+					? "Please check your email for a verification code to complete your account setup."
+					: "Please check your email for a verification code to complete sign-in."
+			}
 		>
+			{/* Contextual Info Message */}
+			{!isFromSignup && (
+				<div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+					<p className="text-sm text-blue-600">
+						Your account needs to be verified before you can sign in. After
+						verification, you'll be redirected back to sign in.
+					</p>
+				</div>
+			)}
+
 			<form
 				className={theme.components.form.spacing}
 				onSubmit={handleSubmit(onSubmit)}

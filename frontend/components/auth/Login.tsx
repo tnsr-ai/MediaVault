@@ -30,14 +30,26 @@ export default function Login() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	// Check for verification success message
+	// Check for verification success message or errors
 	useEffect(() => {
 		const verified = searchParams.get("verified");
+		const error = searchParams.get("error");
+
 		if (verified === "true") {
-			setSuccessMessage("Email verified successfully! You can now sign in.");
-			// Clean up URL
+			setSuccessMessage(
+				"Email verified successfully! You can now sign in with your credentials.",
+			);
+		} else if (error === "missing-email") {
+			setLoginError(
+				"Unable to verify email. Please try signing in or creating an account.",
+			);
+		}
+
+		// Clean up URL
+		if (verified || error) {
 			const url = new URL(window.location.href);
 			url.searchParams.delete("verified");
+			url.searchParams.delete("error");
 			window.history.replaceState({}, "", url.toString());
 		}
 	}, [searchParams]);
@@ -68,7 +80,9 @@ export default function Login() {
 				router.push("/"); // Redirect to home page (update this to /dashboard when available)
 			} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
 				// User needs to verify their email
-				router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+				router.push(
+					`/verify-email?email=${encodeURIComponent(data.email)}&source=login`,
+				);
 			} else if (nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE") {
 				// 2FA is required
 				router.push("/2fa");
@@ -90,7 +104,9 @@ export default function Login() {
 			) {
 				setLoginError("Please verify your email before signing in.");
 				// Optionally redirect to verify email page
-				router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+				router.push(
+					`/verify-email?email=${encodeURIComponent(data.email)}&source=login`,
+				);
 			} else if (
 				error instanceof Error &&
 				error.name === "TooManyRequestsException"
