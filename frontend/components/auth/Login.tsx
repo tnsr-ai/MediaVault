@@ -79,9 +79,16 @@ export default function Login() {
 				// User is successfully signed in
 				router.push("/"); // Redirect to home page (update this to /dashboard when available)
 			} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
-				// User needs to verify their email
+				// User needs to verify their email - pass credentials for auto-login after verification
+				const loginData = {
+					email: data.email,
+					password: data.password,
+				};
+				const loginDataParam = btoa(JSON.stringify(loginData)); // Base64 encode
 				router.push(
-					`/verify-email?email=${encodeURIComponent(data.email)}&source=login`,
+					`/verify-email?email=${encodeURIComponent(
+						data.email,
+					)}&source=login&loginData=${encodeURIComponent(loginDataParam)}`,
 				);
 			} else if (nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_TOTP_CODE") {
 				// 2FA is required
@@ -103,9 +110,16 @@ export default function Login() {
 				error.name === "UserNotConfirmedException"
 			) {
 				setLoginError("Please verify your email before signing in.");
-				// Optionally redirect to verify email page
+				// Pass credentials for auto-login after verification
+				const loginData = {
+					email: data.email,
+					password: data.password,
+				};
+				const loginDataParam = btoa(JSON.stringify(loginData)); // Base64 encode
 				router.push(
-					`/verify-email?email=${encodeURIComponent(data.email)}&source=login`,
+					`/verify-email?email=${encodeURIComponent(
+						data.email,
+					)}&source=login&loginData=${encodeURIComponent(loginDataParam)}`,
 				);
 			} else if (
 				error instanceof Error &&

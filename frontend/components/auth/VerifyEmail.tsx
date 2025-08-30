@@ -46,6 +46,7 @@ function VerifyEmailContent() {
 	const dataParam = searchParams.get("data");
 	const emailParam = searchParams.get("email"); // Fallback for old URLs or login redirects
 	const sourceParam = searchParams.get("source"); // Track source (login, signup)
+	const loginDataParam = searchParams.get("loginData"); // Login credentials for auto-login
 
 	// Parse user data or use email fallback
 	let userData: {
@@ -56,8 +57,22 @@ function VerifyEmailContent() {
 		password?: string; // Password for auto-login after verification
 	} | null = null;
 
+	let loginCredentials: {
+		email: string;
+		password: string;
+	} | null = null;
+
 	let email = "";
 	let isFromSignup = false; // Track if user came from signup or login
+
+	// Parse login credentials if coming from login flow
+	if (loginDataParam) {
+		try {
+			loginCredentials = JSON.parse(atob(loginDataParam));
+		} catch (error) {
+			console.error("Failed to parse login data from URL:", error);
+		}
+	}
 
 	if (dataParam) {
 		// User came from signup flow with full data
@@ -72,7 +87,7 @@ function VerifyEmailContent() {
 		}
 	} else {
 		// User came from login flow with only email, or direct access
-		email = emailParam || "";
+		email = emailParam || loginCredentials?.email || "";
 		isFromSignup = sourceParam !== "login"; // If source=login, it's from login flow
 	}
 
@@ -189,7 +204,7 @@ function VerifyEmailContent() {
 
 				// Handle post-verification flow based on how user got here
 				if (isFromSignup && userData?.password) {
-					// User came from signup - attempt auto-login
+					// User came from signup - attempt auto-login with signup credentials
 					try {
 						const { isSignedIn } = await signIn({
 							username: email,
@@ -198,19 +213,51 @@ function VerifyEmailContent() {
 
 						if (isSignedIn) {
 							// User is automatically signed in after verification
-							console.log("User automatically signed in after verification");
+							console.log(
+								"User automatically signed in after signup verification",
+							);
 							router.push("/"); // Redirect to home page (update this to /dashboard when available)
 							return;
 						}
 					} catch (signInError) {
-						console.error("Auto-login failed after verification:", signInError);
+						console.error(
+							"Auto-login failed after signup verification:",
+							signInError,
+						);
+						// If auto-login fails, redirect to login page with success message
+						router.push("/?verified=true");
+						return;
+					}
+				} else if (!isFromSignup && loginCredentials) {
+					// User came from login flow - attempt auto-login with login credentials
+					try {
+						const { isSignedIn } = await signIn({
+							username: loginCredentials.email,
+							password: loginCredentials.password,
+						});
+
+						if (isSignedIn) {
+							// User is automatically signed in after verification
+							console.log(
+								"User automatically signed in after login verification",
+							);
+							router.push("/"); // Redirect to home page (update this to /dashboard when available)
+							return;
+						}
+					} catch (signInError) {
+						console.error(
+							"Auto-login failed after login verification:",
+							signInError,
+						);
 						// If auto-login fails, redirect to login page with success message
 						router.push("/?verified=true");
 						return;
 					}
 				} else {
-					// User came from login flow - redirect back to login with success message
-					console.log("User verified from login flow - redirecting to login");
+					// No credentials available - redirect to login with success message
+					console.log(
+						"No credentials available for auto-login - redirecting to login",
+					);
 					router.push("/?verified=true");
 					return;
 				}
@@ -368,8 +415,9 @@ function VerifyEmailContent() {
 			{!isFromSignup && (
 				<div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
 					<p className="text-sm text-blue-600">
-						Your account needs to be verified before you can sign in. After
-						verification, you'll be redirected back to sign in.
+						{loginCredentials
+							? "Your account needs to be verified before you can sign in. After verification, you'll be automatically signed in."
+							: "Your account needs to be verified before you can sign in. After verification, you'll be redirected back to sign in."}
 					</p>
 				</div>
 			)}
