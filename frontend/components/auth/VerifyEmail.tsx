@@ -19,11 +19,10 @@ import {
 	getInputWithErrorStyles,
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { confirmSignUp, resendSignUpCode } from "aws-amplify/auth";
+import { confirmSignUp, resendSignUpCode, signIn } from "aws-amplify/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
 
 // Configuration for verification code input
@@ -53,6 +52,7 @@ function VerifyEmailContent() {
 		firstName: string;
 		lastName: string;
 		userId: string;
+		password?: string; // Password for auto-login after verification
 	} | null = null;
 
 	let email = "";
@@ -139,8 +139,30 @@ function VerifyEmailContent() {
 					console.warn("No user data available for sync after verification");
 				}
 
-				// Navigate to login page after successful verification and sync
-				router.push("/");
+				// Auto-login user after successful verification if password is available
+				if (userData?.password) {
+					try {
+						const { isSignedIn } = await signIn({
+							username: email,
+							password: userData.password,
+						});
+
+						if (isSignedIn) {
+							// User is automatically signed in after verification
+							console.log("User automatically signed in after verification");
+							router.push("/"); // Redirect to home page (update this to /dashboard when available)
+							return;
+						}
+					} catch (signInError) {
+						console.error("Auto-login failed after verification:", signInError);
+						// If auto-login fails, redirect to login page with success message
+						router.push("/?verified=true");
+						return;
+					}
+				}
+
+				// Fallback: redirect to login with verification success message
+				router.push("/?verified=true");
 			} catch (error: unknown) {
 				// Handle verification errors
 				if (error instanceof Error && error.name === "CodeMismatchException") {

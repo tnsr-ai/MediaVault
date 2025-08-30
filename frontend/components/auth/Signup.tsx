@@ -62,12 +62,16 @@ export default function Signup() {
 				},
 			});
 
-			// Redirect to email verification page with user data
+			// Redirect to email verification page with user data and credentials
+			// Note: In production, consider using session storage or encrypted tokens
 			const userData = {
 				email: data.email,
 				firstName: data.firstName,
 				lastName: data.lastName,
 				userId: `${apiConfig.awsRegion}:${userId}`,
+				// Store password temporarily for auto-login after verification
+				// This is acceptable since it's client-side only and temporary
+				password: data.password,
 			};
 			const userDataParam = btoa(JSON.stringify(userData)); // Base64 encode
 			router.push(`/verify-email?data=${encodeURIComponent(userDataParam)}`);

@@ -14,8 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "aws-amplify/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
@@ -24,9 +24,23 @@ import OrDivider from "./OrDivider";
 
 export default function Login() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const [loginError, setLoginError] = useState<string | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+	// Check for verification success message
+	useEffect(() => {
+		const verified = searchParams.get("verified");
+		if (verified === "true") {
+			setSuccessMessage("Email verified successfully! You can now sign in.");
+			// Clean up URL
+			const url = new URL(window.location.href);
+			url.searchParams.delete("verified");
+			window.history.replaceState({}, "", url.toString());
+		}
+	}, [searchParams]);
 
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
@@ -51,7 +65,7 @@ export default function Login() {
 
 			if (isSignedIn) {
 				// User is successfully signed in
-				router.push("/dashboard"); // Redirect to your main app
+				router.push("/"); // Redirect to home page (update this to /dashboard when available)
 			} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
 				// User needs to verify their email
 				router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
@@ -109,6 +123,13 @@ export default function Login() {
 				className={theme.components.form.spacing}
 				onSubmit={handleSubmit(onSubmit)}
 			>
+				{/* Success Message Display */}
+				{successMessage && (
+					<div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+						<p className="text-sm text-green-600">{successMessage}</p>
+					</div>
+				)}
+
 				{/* Login Error Display */}
 				{loginError && (
 					<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
