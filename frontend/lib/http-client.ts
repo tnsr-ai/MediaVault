@@ -4,15 +4,15 @@ import axios, {
 	type AxiosRequestConfig,
 	type AxiosResponse,
 } from "axios";
-import { getRequiredEnv } from "./env-utils";
+import { apiConfig } from "./api-config";
 
 class HttpClient {
 	private client: AxiosInstance;
 
 	constructor(baseURL?: string) {
 		this.client = axios.create({
-			baseURL: baseURL || getRequiredEnv("NEXT_PUBLIC_API_URL"),
-			timeout: 10000,
+			baseURL: baseURL || apiConfig.baseUrl,
+			timeout: apiConfig.timeout,
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -98,8 +98,15 @@ class HttpClient {
 	}
 }
 
-// Create and export a singleton instance
-export const httpClient = new HttpClient();
+// Create a lazy singleton instance
+let _httpClient: HttpClient | null = null;
+
+export function getHttpClient(): HttpClient {
+	if (!_httpClient) {
+		_httpClient = new HttpClient();
+	}
+	return _httpClient;
+}
 
 // Export the class for testing or custom instances
 export { HttpClient };

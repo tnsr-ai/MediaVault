@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { userApi } from "@/lib/api/user";
 import { config } from "@/lib/config";
 import {
 	RESEND_TIMER_SECONDS,
@@ -42,8 +43,31 @@ function VerifyEmailContent() {
 	const [canResend, setCanResend] = useState(true);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-	// Get email from query params if available
-	const email = searchParams.get("email") || "";
+	// Get user data from query params
+	const dataParam = searchParams.get("data");
+	const emailParam = searchParams.get("email"); // Fallback for old URLs
+
+	// Parse user data or use email fallback
+	let userData: {
+		email: string;
+		firstName: string;
+		lastName: string;
+		userId: string;
+	} | null = null;
+
+	let email = "";
+
+	if (dataParam) {
+		try {
+			userData = JSON.parse(atob(dataParam));
+			email = userData?.email || "";
+		} catch (error) {
+			console.error("Failed to parse user data from URL:", error);
+			email = emailParam || "";
+		}
+	} else {
+		email = emailParam || "";
+	}
 
 	// Timer effect for resend functionality
 	useEffect(() => {
@@ -91,7 +115,31 @@ function VerifyEmailContent() {
 					confirmationCode: data.code,
 				});
 
-				// Navigate to login page after successful verification
+				// After successful verification, sync user with backend
+				if (userData) {
+					try {
+						await userApi.syncUser({
+							cognito_user_id: userData.userId,
+							first_name: userData.firstName,
+							last_name: userData.lastName,
+							email: userData.email,
+						});
+						console.log(
+							"User successfully synced with backend after verification",
+						);
+					} catch (syncError) {
+						console.error(
+							"Failed to sync user with backend after verification:",
+							syncError,
+						);
+						// Don't fail the verification process if backend sync fails
+						// The user is still verified and can proceed to login
+					}
+				} else {
+					console.warn("No user data available for sync after verification");
+				}
+
+				// Navigate to login page after successful verification and sync
 				router.push("/");
 			} catch (error: unknown) {
 				// Handle verification errors

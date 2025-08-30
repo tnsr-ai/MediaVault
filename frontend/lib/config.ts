@@ -1,5 +1,3 @@
-import { getRequiredEnv } from "./env-utils";
-
 export const config = {
 	// Application metadata
 	app: {
@@ -154,15 +152,6 @@ export const config = {
 		scale: 0.8,
 		noiseIntensity: 1.0,
 		rotation: 60,
-	},
-
-	// API configuration
-	api: {
-		baseUrl: getRequiredEnv("NEXT_PUBLIC_API_URL"),
-		timeout: 10000, // 10 seconds
-		endpoints: {
-			syncUser: "/api/dev/sync-user",
-		},
 	},
 
 	// Features that can be toggled

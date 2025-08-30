@@ -6,4 +6,4 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Export HTTP client for external usage
-export { httpClient, HttpClient } from "./http-client";
+export { getHttpClient, HttpClient } from "./http-client";

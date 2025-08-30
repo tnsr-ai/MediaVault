@@ -4,6 +4,7 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength-indicator";
+import { apiConfig } from "@/lib/api-config";
 import { userApi } from "@/lib/api/user";
 import { config } from "@/lib/config";
 import { getButtonStyles, theme } from "@/lib/theme";
@@ -61,23 +62,15 @@ export default function Signup() {
 				},
 			});
 
-			// Sync user data with backend if userId is available
-			if (userId) {
-				try {
-					await userApi.syncUser({
-						cognito_user_id: userId,
-						first_name: data.firstName,
-						last_name: data.lastName,
-						email: data.email,
-					});
-					console.log("User successfully synced with backend");
-				} catch (syncError) {
-					console.error("Failed to sync user with backend:", syncError);
-				}
-			}
-
-			// Redirect to email verification page with email parameter
-			router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+			// Redirect to email verification page with user data
+			const userData = {
+				email: data.email,
+				firstName: data.firstName,
+				lastName: data.lastName,
+				userId: `${apiConfig.awsRegion}:${userId}`,
+			};
+			const userDataParam = btoa(JSON.stringify(userData)); // Base64 encode
+			router.push(`/verify-email?data=${encodeURIComponent(userDataParam)}`);
 		} catch (error: unknown) {
 			// Handle signup errors
 			if (error instanceof Error && error.name === "UsernameExistsException") {

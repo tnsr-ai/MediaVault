@@ -4,7 +4,7 @@
  * This module contains all user-related API calls.
  */
 
-import { httpClient } from "../http-client";
+import { getHttpClient } from "../http-client";
 
 export interface SyncUserPayload {
 	cognito_user_id: string;
@@ -25,7 +25,7 @@ class UserApiService {
 	 */
 	async syncUser(payload: SyncUserPayload): Promise<SyncUserResponse> {
 		try {
-			const response = await httpClient.post<SyncUserResponse>(
+			const response = await getHttpClient().post<SyncUserResponse>(
 				"/api/dev/sync-user",
 				payload,
 			);
