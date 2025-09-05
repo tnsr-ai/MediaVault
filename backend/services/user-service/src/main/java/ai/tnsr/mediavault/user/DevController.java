@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,7 +21,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/dev")
-@CrossOrigin(origins = "*")
 @Profile("dev")
 @Tag(name = "Development", description = "Development-only endpoints for testing and local development")
 public class DevController {
@@ -30,9 +30,10 @@ public class DevController {
 
     @Operation(
         summary = "Sync user from Cognito signup (Development Only)",
-        description = "Development endpoint to simulate AWS Lambda trigger. Creates a user record after Cognito signup. This endpoint is only available in development profile.",
+        description = "Development endpoint to simulate AWS Lambda trigger. Creates a user record after Cognito signup. This endpoint is only available in development profile and does not require authentication.",
         tags = {"Development"}
     )
+    @SecurityRequirements() // Override global security - no authentication required
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "201",
@@ -44,7 +45,7 @@ public class DevController {
                     value = """
                     {
                         "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "cognitoUserId": "us-east-1:12345678-1234-1234-1234-123456789012",
+                        "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
                         "firstName": "John",
                         "lastName": "Doe",
                         "email": "john.doe@example.com",
@@ -74,7 +75,7 @@ public class DevController {
                 examples = @ExampleObject(
                     value = """
                     {
-                        "cognito_user_id": "us-east-1:12345678-1234-1234-1234-123456789012",
+                        "cognito_user_id": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
                         "first_name": "John",
                         "last_name": "Doe",
                         "email": "john.doe@example.com"

@@ -4,12 +4,16 @@ import ai.tnsr.mediavault.user.dto.CognitoUserSignupRequest;
 import ai.tnsr.mediavault.user.dto.UserResponse;
 import ai.tnsr.mediavault.user.model.User;
 import ai.tnsr.mediavault.user.service.JwtService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -85,13 +89,23 @@ public class UserService {
 
     // New JWT-based methods
     public UserResponse getCurrentUser() {
-        String cognitoUserId = jwtService.getCurrentUserCognitoId();
-        return getUserByCognitoId(cognitoUserId);
+        try {
+            String cognitoUserId = jwtService.getCurrentUserCognitoId();
+            return getUserByCognitoId(cognitoUserId);
+        } catch (Exception e) {
+            logger.error("Failed to get current user from JWT: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Transactional
     public UserResponse updateCurrentUserStorage(Long storageUsedBytes) {
-        String cognitoUserId = jwtService.getCurrentUserCognitoId();
-        return updateUserStorage(cognitoUserId, storageUsedBytes);
+        try {
+            String cognitoUserId = jwtService.getCurrentUserCognitoId();
+            return updateUserStorage(cognitoUserId, storageUsedBytes);
+        } catch (Exception e) {
+            logger.error("Failed to update current user storage from JWT: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 }

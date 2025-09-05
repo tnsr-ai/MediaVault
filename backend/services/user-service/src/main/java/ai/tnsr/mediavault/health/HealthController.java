@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 @Tag(name = "Health", description = "Health check endpoints for monitoring and load balancers")
 public class HealthController {
 

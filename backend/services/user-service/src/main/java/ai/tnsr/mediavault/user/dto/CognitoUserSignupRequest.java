@@ -1,5 +1,6 @@
 package ai.tnsr.mediavault.user.dto;
 
+import ai.tnsr.mediavault.user.validation.CognitoUserId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,8 +12,9 @@ public class CognitoUserSignupRequest {
     @JsonProperty("cognito_user_id")
     @NotBlank(message = "Cognito user ID is required")
     @Size(max = 255, message = "Cognito user ID must not exceed 255 characters")
+    @CognitoUserId
     @Schema(description = "The unique identifier from AWS Cognito (sub claim from JWT)",
-            example = "us-east-1:12345678-1234-1234-1234-123456789012",
+            example = "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
             required = true)
     private String cognitoUserId;
 

@@ -2,6 +2,8 @@ package ai.tnsr.mediavault.user;
 
 import ai.tnsr.mediavault.user.dto.UpdateStorageRequest;
 import ai.tnsr.mediavault.user.dto.UserResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +18,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 @Tag(name = "User Management", description = "Secure JWT-based APIs for managing users in MediaVault platform")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -44,7 +48,7 @@ public class UserController {
                     value = """
                     {
                         "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "cognitoUserId": "us-east-1:12345678-1234-1234-1234-123456789012",
+                        "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
                         "firstName": "John",
                         "lastName": "Doe",
                         "email": "john.doe@example.com"
@@ -67,19 +71,25 @@ public class UserController {
         )
     })
     @GetMapping("/users/me")
-    public ResponseEntity<UserResponse> getCurrentUser() {
+    public ResponseEntity<UserResponse> getCurrentUser(HttpServletRequest request) {
+        logger.info("GET /api/users/me - Request received");
+
         try {
             UserResponse response = userService.getCurrentUser();
 
             if (response.getId() != null) {
+                logger.info("Successfully retrieved user: {}", response.getEmail());
                 return ResponseEntity.ok(response);
             } else {
+                logger.warn("User not found in database");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } catch (SecurityException e) {
+            logger.error("Authentication error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new UserResponse("Unauthorized: " + e.getMessage()));
         } catch (Exception e) {
+            logger.error("Unexpected error retrieving current user: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new UserResponse("Failed to retrieve user: " + e.getMessage()));
         }
@@ -102,7 +112,7 @@ public class UserController {
                     value = """
                     {
                         "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "cognitoUserId": "us-east-1:12345678-1234-1234-1234-123456789012",
+                        "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
                         "firstName": "John",
                         "lastName": "Doe",
                         "email": "john.doe@example.com",
