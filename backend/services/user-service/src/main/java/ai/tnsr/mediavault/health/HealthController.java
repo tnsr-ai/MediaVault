@@ -1,14 +1,18 @@
 package ai.tnsr.mediavault.health;
 
+import ai.tnsr.mediavault.common.dto.ApiResponse;
+import ai.tnsr.mediavault.common.dto.HealthData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/api")
@@ -21,17 +25,40 @@ public class HealthController {
         tags = {"Health"}
     )
     @ApiResponses(value = {
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "Service is healthy",
             content = @Content(
-                mediaType = "text/plain",
-                examples = @ExampleObject(value = "User service is running")
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 200,
+                        "message": "Service is healthy",
+                        "data": {
+                            "service": "user-service",
+                            "status": "UP",
+                            "version": "1.0.0",
+                            "timestamp": "2024-01-01T10:00:00Z"
+                        }
+                    }
+                    """
+                )
             )
         )
     })
     @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("User service is running");
+    public ResponseEntity<ApiResponse<HealthData>> healthCheck() {
+        HealthData healthData = new HealthData(
+            "user-service",
+            "UP",
+            "1.0.0",
+            Instant.now().toString()
+        );
+
+        ApiResponse<HealthData> response = ApiResponse.success("Service is healthy", healthData);
+        return ResponseEntity.ok(response);
     }
 }

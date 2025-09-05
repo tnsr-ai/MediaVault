@@ -1,7 +1,10 @@
 package ai.tnsr.mediavault.user;
 
+import ai.tnsr.mediavault.common.dto.ApiResponse;
 import ai.tnsr.mediavault.user.dto.CognitoUserSignupRequest;
-import ai.tnsr.mediavault.user.dto.UserResponse;
+import ai.tnsr.mediavault.user.dto.UserData;
+import ai.tnsr.mediavault.user.model.User;
+import ai.tnsr.mediavault.user.service.UserDataMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -10,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -28,6 +30,9 @@ public class DevController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserDataMapper userDataMapper;
+
     @Operation(
         summary = "Sync user from Cognito signup (Development Only)",
         description = "Development endpoint to simulate AWS Lambda trigger. Creates a user record after Cognito signup. This endpoint is only available in development profile and does not require authentication.",
@@ -35,37 +40,99 @@ public class DevController {
     )
     @SecurityRequirements() // Override global security - no authentication required
     @ApiResponses(value = {
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "201",
             description = "User created successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
+                schema = @Schema(implementation = ApiResponse.class),
                 examples = @ExampleObject(
                     value = """
                     {
-                        "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
-                        "firstName": "John",
-                        "lastName": "Doe",
-                        "email": "john.doe@example.com",
-                        "message": "User created successfully"
+                        "apiVersion": "1.0",
+                        "code": 201,
+                        "message": "User created successfully",
+                        "data": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
+                            "firstName": "John",
+                            "lastName": "Doe",
+                            "email": "john.doe@example.com"
+                        }
                     }
                     """
                 )
             )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",
-            description = "User already exists"
+            description = "User already exists",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 409,
+                        "message": "Conflict",
+                        "error": {
+                            "code": 409,
+                            "message": "User already exists",
+                            "reason": "A user with this Cognito ID already exists"
+                        }
+                    }
+                    """
+                )
+            )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "Invalid request data"
+            description = "Invalid request data",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 400,
+                        "message": "Bad Request",
+                        "error": {
+                            "code": 400,
+                            "message": "Invalid request data",
+                            "reason": "Required fields are missing or invalid"
+                        }
+                    }
+                    """
+                )
+            )
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 500,
+                        "message": "Internal server error",
+                        "error": {
+                            "code": 500,
+                            "message": "Internal server error",
+                            "reason": "An unexpected error occurred"
+                        }
+                    }
+                    """
+                )
+            )
         )
     })
     @PostMapping("/sync-user")
-    public ResponseEntity<UserResponse> syncUserFromCognito(
+    public ResponseEntity<ApiResponse<UserData>> syncUserFromCognito(
         @Parameter(
             description = "User signup data from AWS Cognito",
             required = true,
@@ -86,16 +153,24 @@ public class DevController {
         )
         @Valid @RequestBody CognitoUserSignupRequest request) {
         try {
-            UserResponse response = userService.createUserFromCognito(request);
+            User newUser = userService.createUserFromCognitoEntity(request);
 
-            if (response.getId() != null) {
+            if (newUser != null) {
+                // Convert User entity to UserData using mapper
+                UserData userData = userDataMapper.toUserData(newUser);
+
+                ApiResponse<UserData> response = ApiResponse.created("User created successfully", userData);
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
             } else {
+                ApiResponse<UserData> response = ApiResponse.conflict("User already exists", "A user with this Cognito ID or email already exists");
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             }
+        } catch (IllegalArgumentException e) {
+            ApiResponse<UserData> response = ApiResponse.badRequest("Invalid request data", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new UserResponse("Failed to create user: " + e.getMessage()));
+            ApiResponse<UserData> response = ApiResponse.internalServerError("Failed to create user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

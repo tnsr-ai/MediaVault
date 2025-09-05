@@ -52,6 +52,30 @@ public class UserService {
         );
     }
 
+    // New method to create user and return User entity
+    @Transactional
+    public User createUserFromCognitoEntity(CognitoUserSignupRequest request) {
+        // Check if user already exists by Cognito ID
+        if (userRepository.existsByCognitoUserId(request.getCognitoUserId())) {
+            return null; // Indicates user already exists
+        }
+
+        // Check if user already exists by email
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return null; // Indicates user already exists
+        }
+
+        // Create new user
+        User user = new User();
+        user.setCognitoUserId(request.getCognitoUserId());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+
+        // Save user to database
+        return userRepository.save(user);
+    }
+
     public UserResponse getUserByCognitoId(String cognitoUserId) {
         return userRepository.findByCognitoUserId(cognitoUserId)
             .map(user -> new UserResponse(
@@ -98,6 +122,24 @@ public class UserService {
         }
     }
 
+    // New method to get User entity directly
+    public User getCurrentUserEntity() {
+        try {
+            String cognitoUserId = jwtService.getCurrentUserCognitoId();
+            return userRepository.findByCognitoUserId(cognitoUserId)
+                .orElse(null);
+        } catch (Exception e) {
+            logger.error("Failed to get current user entity from JWT: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // New method to get User entity by Cognito ID
+    public User getUserEntityByCognitoId(String cognitoUserId) {
+        return userRepository.findByCognitoUserId(cognitoUserId)
+            .orElse(null);
+    }
+
     @Transactional
     public UserResponse updateCurrentUserStorage(Long storageUsedBytes) {
         try {
@@ -105,6 +147,28 @@ public class UserService {
             return updateUserStorage(cognitoUserId, storageUsedBytes);
         } catch (Exception e) {
             logger.error("Failed to update current user storage from JWT: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // New method to update and return User entity
+    @Transactional
+    public User updateCurrentUserStorageEntity(Long storageUsedBytes) {
+        try {
+            String cognitoUserId = jwtService.getCurrentUserCognitoId();
+            return userRepository.findByCognitoUserId(cognitoUserId)
+                .map(user -> {
+                    // Check if the new storage usage exceeds quota
+                    if (storageUsedBytes > user.getStorageQuotaBytes()) {
+                        throw new IllegalArgumentException("Storage usage exceeds quota limit");
+                    }
+
+                    user.setStorageUsedBytes(storageUsedBytes);
+                    return userRepository.save(user);
+                })
+                .orElse(null);
+        } catch (Exception e) {
+            logger.error("Failed to update current user storage entity from JWT: {}", e.getMessage(), e);
             throw e;
         }
     }

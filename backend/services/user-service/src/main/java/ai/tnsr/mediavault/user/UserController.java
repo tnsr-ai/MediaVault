@@ -1,7 +1,10 @@
 package ai.tnsr.mediavault.user;
 
+import ai.tnsr.mediavault.common.dto.ApiResponse;
 import ai.tnsr.mediavault.user.dto.UpdateStorageRequest;
-import ai.tnsr.mediavault.user.dto.UserResponse;
+import ai.tnsr.mediavault.user.dto.UserData;
+import ai.tnsr.mediavault.user.model.User;
+import ai.tnsr.mediavault.user.service.UserDataMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,6 +33,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserDataMapper userDataMapper;
+
     @Operation(
         summary = "Get current user profile",
         description = "Retrieves the profile of the currently authenticated user based on JWT token. The user ID is extracted from the JWT 'sub' claim.",
@@ -38,60 +43,127 @@ public class UserController {
         security = @SecurityRequirement(name = "bearer-jwt")
     )
     @ApiResponses(value = {
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "User profile retrieved successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
+                schema = @Schema(implementation = ApiResponse.class),
                 examples = @ExampleObject(
                     value = """
                     {
-                        "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
-                        "firstName": "John",
-                        "lastName": "Doe",
-                        "email": "john.doe@example.com"
+                        "apiVersion": "1.0",
+                        "code": 200,
+                        "message": "User profile retrieved successfully",
+                        "data": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
+                            "firstName": "John",
+                            "lastName": "Doe",
+                            "email": "john.doe@example.com",
+                            "storageUsedBytes": 1073741824,
+                            "storageQuotaBytes": 5368709120
+                        }
                     }
                     """
                 )
             )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "401",
-            description = "Unauthorized - Invalid or missing JWT token"
+            description = "Unauthorized - Invalid or missing JWT token",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 401,
+                        "message": "Unauthorized",
+                        "error": {
+                            "code": 401,
+                            "message": "Unauthorized",
+                            "reason": "Authentication required or invalid credentials"
+                        }
+                    }
+                    """
+                )
+            )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "User not found in database"
+            description = "User not found in database",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 404,
+                        "message": "User not found",
+                        "error": {
+                            "code": 404,
+                            "message": "User not found",
+                            "reason": "The requested resource was not found"
+                        }
+                    }
+                    """
+                )
+            )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "500",
-            description = "Internal server error"
+            description = "Internal server error",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 500,
+                        "message": "Internal server error",
+                        "error": {
+                            "code": 500,
+                            "message": "Internal server error",
+                            "reason": "An unexpected error occurred"
+                        }
+                    }
+                    """
+                )
+            )
         )
     })
     @GetMapping("/users/me")
-    public ResponseEntity<UserResponse> getCurrentUser(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<UserData>> getCurrentUser(HttpServletRequest request) {
         logger.info("GET /api/users/me - Request received");
 
         try {
-            UserResponse response = userService.getCurrentUser();
+            User userEntity = userService.getCurrentUserEntity();
 
-            if (response.getId() != null) {
-                logger.info("Successfully retrieved user: {}", response.getEmail());
+            if (userEntity != null) {
+                logger.info("Successfully retrieved user: {}", userEntity.getEmail());
+
+                // Convert User entity to UserData using mapper
+                UserData userData = userDataMapper.toUserData(userEntity);
+
+                ApiResponse<UserData> response = ApiResponse.success("User profile retrieved successfully", userData);
                 return ResponseEntity.ok(response);
             } else {
                 logger.warn("User not found in database");
+                ApiResponse<UserData> response = ApiResponse.notFound("User not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } catch (SecurityException e) {
             logger.error("Authentication error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new UserResponse("Unauthorized: " + e.getMessage()));
+            ApiResponse<UserData> response = ApiResponse.unauthorized("Unauthorized: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (Exception e) {
             logger.error("Unexpected error retrieving current user: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new UserResponse("Failed to retrieve user: " + e.getMessage()));
+            ApiResponse<UserData> response = ApiResponse.internalServerError("Failed to retrieve user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -102,56 +174,123 @@ public class UserController {
         security = @SecurityRequirement(name = "bearer-jwt")
     )
     @ApiResponses(value = {
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "Storage updated successfully",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
+                schema = @Schema(implementation = ApiResponse.class),
                 examples = @ExampleObject(
                     value = """
                     {
-                        "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
-                        "firstName": "John",
-                        "lastName": "Doe",
-                        "email": "john.doe@example.com",
-                        "message": "User created successfully"
+                        "apiVersion": "1.0",
+                        "code": 200,
+                        "message": "Storage updated successfully",
+                        "data": {
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "cognitoUserId": "ap-south-1:71635d7a-50f1-708e-6f6f-f7d7d1a23e63",
+                            "firstName": "John",
+                            "lastName": "Doe",
+                            "email": "john.doe@example.com",
+                            "storageUsedBytes": 2147483648,
+                            "storageQuotaBytes": 5368709120
+                        }
                     }
                     """
                 )
             )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
             description = "Storage exceeds quota or invalid request",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = UserResponse.class),
+                schema = @Schema(implementation = ApiResponse.class),
                 examples = @ExampleObject(
                     value = """
                     {
-                        "message": "Storage usage exceeds quota limit"
+                        "apiVersion": "1.0",
+                        "code": 400,
+                        "message": "Bad Request",
+                        "error": {
+                            "code": 400,
+                            "message": "Storage usage exceeds quota limit",
+                            "reason": "The requested storage usage exceeds the user's quota"
+                        }
                     }
                     """
                 )
             )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "401",
-            description = "Unauthorized - Invalid or missing JWT token"
+            description = "Unauthorized - Invalid or missing JWT token",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 401,
+                        "message": "Unauthorized",
+                        "error": {
+                            "code": 401,
+                            "message": "Unauthorized",
+                            "reason": "Authentication required or invalid credentials"
+                        }
+                    }
+                    """
+                )
+            )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "User not found in database"
+            description = "User not found in database",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 404,
+                        "message": "User not found",
+                        "error": {
+                            "code": 404,
+                            "message": "User not found",
+                            "reason": "The requested resource was not found"
+                        }
+                    }
+                    """
+                )
+            )
         ),
-        @ApiResponse(
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "500",
-            description = "Internal server error"
+            description = "Internal server error",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "apiVersion": "1.0",
+                        "code": 500,
+                        "message": "Internal server error",
+                        "error": {
+                            "code": 500,
+                            "message": "Internal server error",
+                            "reason": "An unexpected error occurred"
+                        }
+                    }
+                    """
+                )
+            )
         )
     })
     @PutMapping("/users/me/storage")
-    public ResponseEntity<UserResponse> updateCurrentUserStorage(
+    public ResponseEntity<ApiResponse<UserData>> updateCurrentUserStorage(
         @Parameter(
             description = "Storage usage update data",
             required = true,
@@ -169,21 +308,27 @@ public class UserController {
         )
         @Valid @RequestBody UpdateStorageRequest request) {
         try {
-            UserResponse response = userService.updateCurrentUserStorage(request.getStorageUsedBytes());
+            User updatedUser = userService.updateCurrentUserStorageEntity(request.getStorageUsedBytes());
 
-            if (response.getId() != null) {
+            if (updatedUser != null) {
+                // Convert User entity to UserData using mapper
+                UserData userData = userDataMapper.toUserData(updatedUser);
+
+                ApiResponse<UserData> response = ApiResponse.success("Storage updated successfully", userData);
                 return ResponseEntity.ok(response);
-            } else if (response.getMessage().contains("not found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                ApiResponse<UserData> response = ApiResponse.notFound("User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
+        } catch (IllegalArgumentException e) {
+            ApiResponse<UserData> response = ApiResponse.badRequest("Bad Request", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new UserResponse("Unauthorized: " + e.getMessage()));
+            ApiResponse<UserData> response = ApiResponse.unauthorized("Unauthorized: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new UserResponse("Failed to update storage: " + e.getMessage()));
+            ApiResponse<UserData> response = ApiResponse.internalServerError("Failed to update storage: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }
