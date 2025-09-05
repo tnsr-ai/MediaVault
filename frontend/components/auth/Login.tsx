@@ -77,7 +77,7 @@ export default function Login() {
 
 			if (isSignedIn) {
 				// User is successfully signed in
-				router.push("/"); // Redirect to home page (update this to /dashboard when available)
+				router.push("/dashboard"); // Redirect to dashboard
 			} else if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
 				// User needs to verify their email - pass credentials for auto-login after verification
 				const loginData = {

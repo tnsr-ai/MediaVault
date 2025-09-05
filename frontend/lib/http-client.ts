@@ -44,8 +44,10 @@ class HttpClient {
 			(error) => {
 				// Handle common errors
 				if (error.response?.status === 401) {
-					// Handle unauthorized - redirect to auth page
-					window.location.href = "/auth";
+					// Handle unauthorized - for now, just log and don't redirect
+					console.error("Unauthorized access - 401 error");
+					// TODO: Handle auth redirect when needed
+					// window.location.href = "/auth";
 				}
 				return Promise.reject(error);
 			},

@@ -6,7 +6,7 @@
 
 // User API
 export { userApi, UserApiService } from "./user";
-export type { SyncUserPayload, SyncUserResponse } from "./user";
+export type { SyncUserPayload, SyncUserResponse, UserProfile } from "./user";
 
 // Future API services can be exported here
 // export { productApi } from './product';

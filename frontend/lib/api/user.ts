@@ -19,6 +19,16 @@ export interface SyncUserResponse {
 	user_id?: string;
 }
 
+export interface UserProfile {
+	user_id: string;
+	cognito_user_id: string;
+	first_name: string;
+	last_name: string;
+	email: string;
+	created_at?: string;
+	updated_at?: string;
+}
+
 class UserApiService {
 	/**
 	 * Sync user data with the backend after successful Cognito signup
@@ -42,9 +52,26 @@ class UserApiService {
 	}
 
 	/**
+	 * Get current user profile information
+	 */
+	async getUserMe(): Promise<UserProfile> {
+		try {
+			const response = await getHttpClient().get<UserProfile>("/api/users/me");
+			return response;
+		} catch (error) {
+			console.error("Failed to get user profile:", error);
+
+			// Re-throw with a more descriptive error
+			if (error instanceof Error) {
+				throw new Error(`Get user profile failed: ${error.message}`);
+			}
+			throw new Error("Get user profile failed: Unknown error occurred");
+		}
+	}
+
+	/**
 	 * Future user-related API methods can be added here
 	 * For example:
-	 * - getUserProfile(userId: string)
 	 * - updateUserProfile(userId: string, data: UserProfile)
 	 * - deleteUser(userId: string)
 	 */
