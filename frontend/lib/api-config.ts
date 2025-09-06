@@ -1,3 +1,4 @@
+import { getAwsRegion } from "./aws-region-utils";
 import { getRequiredEnv } from "./env-utils";
 
 /**
@@ -24,15 +25,8 @@ export const apiConfig = {
 	get awsRegion() {
 		// Check if we're in a browser environment
 		if (typeof window !== "undefined") {
-			// Client-side: try to get the env var, use fallback if not available
-			const envRegion = process.env.NEXT_PUBLIC_AWS_REGION;
-			if (!envRegion) {
-				console.warn(
-					"NEXT_PUBLIC_AWS_REGION not available in client context, using fallback",
-				);
-				return "ap-south-1";
-			}
-			return envRegion;
+			// Client-side: try to get region from JWT first, then fall back to env var
+			return getAwsRegion();
 		}
 		// Server-side: use the required env function
 		return getRequiredEnv("NEXT_PUBLIC_AWS_REGION");

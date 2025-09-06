@@ -188,13 +188,25 @@ function VerifyEmailContent() {
 						console.log(
 							"User successfully synced with backend after verification",
 						);
-					} catch (syncError) {
+					} catch (syncError: unknown) {
 						console.error(
 							"Failed to sync user with backend after verification:",
 							syncError,
 						);
-						// Don't fail the verification process if backend sync fails
-						// The user is still verified and can proceed to login
+						// If user already exists (409 conflict), that's okay - continue with flow
+						if (
+							syncError &&
+							typeof syncError === "object" &&
+							"response" in syncError &&
+							(syncError.response as { status?: number })?.status === 409
+						) {
+							console.log(
+								"User already exists in backend - continuing with verification flow",
+							);
+						} else {
+							// Don't fail the verification process if backend sync fails
+							// The user is still verified and can proceed to login
+						}
 					}
 				} else if (!isFromSignup) {
 					console.log("User verified from login flow - skipping backend sync");
@@ -216,7 +228,7 @@ function VerifyEmailContent() {
 							console.log(
 								"User automatically signed in after signup verification",
 							);
-							router.push("/"); // Redirect to home page (update this to /dashboard when available)
+							router.push("/dashboard"); // Redirect to dashboard after successful signup
 							return;
 						}
 					} catch (signInError) {
@@ -241,7 +253,7 @@ function VerifyEmailContent() {
 							console.log(
 								"User automatically signed in after login verification",
 							);
-							router.push("/"); // Redirect to home page (update this to /dashboard when available)
+							router.push("/dashboard"); // Redirect to dashboard after successful verification
 							return;
 						}
 					} catch (signInError) {

@@ -4,8 +4,8 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength-indicator";
-import { apiConfig } from "@/lib/api-config";
 import { userApi } from "@/lib/api/user";
+import { getAwsRegion } from "@/lib/aws-region-utils";
 import { config } from "@/lib/config";
 import { getButtonStyles, theme } from "@/lib/theme";
 import { type SignupFormData, signupSchema } from "@/lib/validations/auth";
@@ -62,13 +62,16 @@ export default function Signup() {
 				},
 			});
 
+			// Get AWS region dynamically (at this point, no JWT available yet, so use fallback)
+			const awsRegion = await getAwsRegion();
+
 			// Redirect to email verification page with user data and credentials
 			// Note: In production, consider using session storage or encrypted tokens
 			const userData = {
 				email: data.email,
 				firstName: data.firstName,
 				lastName: data.lastName,
-				userId: `${apiConfig.awsRegion}:${userId}`,
+				userId: `${awsRegion}:${userId}`,
 				// Store password temporarily for auto-login after verification
 				// This is acceptable since it's client-side only and temporary
 				password: data.password,
