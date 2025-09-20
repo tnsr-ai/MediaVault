@@ -1,8 +1,6 @@
 "use client";
 
 import { type UserProfile, userApi } from "@/lib/api/user";
-import { config } from "@/lib/config";
-import type { Metadata } from "next";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
