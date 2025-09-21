@@ -252,7 +252,7 @@ export function FileUpload() {
 	).length;
 
 	return (
-		<div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col h-[calc(100vh-12rem)]">
+		<div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
 			{/* Header */}
 			<div className="p-4 border-b border-gray-100 flex-shrink-0">
 				<div className="flex items-center justify-between">
