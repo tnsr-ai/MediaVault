@@ -2,6 +2,11 @@
 
 import { Header } from "@/components/ui/header";
 import { Sidebar } from "@/components/ui/sidebar";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+	subsets: ["latin"],
+});
 
 export default function DashboardLayout({
 	children,
@@ -14,9 +19,9 @@ export default function DashboardLayout({
 			style={{ gridTemplateColumns: "auto 1fr" }}
 		>
 			<Sidebar />
-			<div className="flex flex-col overflow-hidden">
+			<div className={`flex flex-col overflow-hidden ${inter.className}`}>
 				<Header />
-				<main className="flex-1 overflow-y-auto pt-6 pb-8 px-5 lg:pt-8 lg:pb-10 lg:px-7 bg-[#f6f6f6] rounded-tl-2xl">
+				<main className="flex-1 overflow-y-auto pt-2 pb-8 px-9 lg:pt-4 lg:pb-10 lg:px-10 bg-[#f6f6f6] rounded-tl-2xl">
 					{children}
 				</main>
 			</div>

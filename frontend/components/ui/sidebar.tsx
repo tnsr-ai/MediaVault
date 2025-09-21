@@ -1,6 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+	subsets: ["latin"],
+});
 import {
 	Activity,
 	Archive,
@@ -94,6 +99,7 @@ export function Sidebar() {
 			className={cn(
 				"hidden bg-white md:block transition-all duration-300 h-screen overflow-hidden",
 				isMounted && isCollapsed ? "w-20" : "w-64",
+				inter.className,
 			)}
 		>
 			<div className="flex h-full flex-col gap-2">
@@ -115,7 +121,7 @@ export function Sidebar() {
 					<Link
 						href="/dashboard"
 						className={cn(
-							"flex items-center gap-3 font-bold text-xl",
+							"flex items-center gap-3 font-bold text-2xl",
 							isCollapsed && "justify-center",
 						)}
 						onClick={(e) => e.stopPropagation()}
