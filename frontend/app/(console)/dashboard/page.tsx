@@ -13,7 +13,7 @@ export default function DashboardPage() {
 			</div>
 
 			{/* Right side - File Upload */}
-			<div className="col-span-2 self-stretch">
+			<div className="col-span-2 self-stretch min-h-0">
 				<FileUpload />
 			</div>
 		</div>
