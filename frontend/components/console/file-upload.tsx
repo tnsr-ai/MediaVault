@@ -252,60 +252,38 @@ export function FileUpload() {
 	).length;
 
 	return (
-		<div className="min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-			{/* Header */}
-			<div className="p-4 border-b border-gray-100 flex-shrink-0">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<div className="p-2 bg-[#e8f5e8] rounded-lg">
-							<Upload className="h-5 w-5 text-[#15412e]" />
-						</div>
-						<div>
-							<h3 className="font-medium text-gray-900">File Upload</h3>
-							{hasFiles && (
-								<p className="text-xs text-gray-500">
-									{completedFiles} completed, {activeUploads} uploading
-								</p>
-							)}
-						</div>
-					</div>
-					<button
-						type="button"
-						className="p-1 hover:bg-gray-100 rounded transition-colors"
-					>
-						<svg
-							className="w-4 h-4 text-gray-400"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							aria-hidden="true"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="2"
-								d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-							/>
-						</svg>
-					</button>
-				</div>
-			</div>
-
-			{/* Upload Area */}
-			<div className="p-4 flex-shrink-0">
+		<div
+			className={
+				hasFiles
+					? "bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4"
+					: ""
+			}
+		>
+			{!hasFiles ? (
+				/* Compact Upload UI - No files */
 				<div
 					className={`
-            relative border-2 border-dashed rounded-lg p-4 text-center transition-colors
+            group relative border-2 border-dashed rounded-lg px-6 py-6 text-center transition-all duration-200 cursor-pointer flex items-center justify-center gap-3
             ${
 							isDragActive
-								? "border-[#15412e] bg-[#e8f5e8]"
-								: "border-gray-300 hover:border-[#15412e] hover:bg-[#f8fdf8]"
+								? "border-[#40916c] bg-[#2d6a4f] scale-[1.01]"
+								: "border-[#40916c] bg-[#eff4ef] hover:bg-[#e3eae3] hover:border-[#52b788] hover:scale-[1.01]"
 						}
           `}
+					role="button"
+					tabIndex={0}
 					onDragEnter={onDragEnter}
 					onDragLeave={onDragLeave}
 					onDragOver={onDragOver}
 					onDrop={onDrop}
+					onClick={handleFileInputClick}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" || e.key === " ") {
+							e.preventDefault();
+							handleFileInputClick();
+						}
+					}}
+					aria-label="Click to select files or drag and drop files here"
 				>
 					<input
 						ref={fileInputRef}
@@ -315,160 +293,194 @@ export function FileUpload() {
 						className="hidden"
 					/>
 
-					<div className="flex flex-col items-center gap-2">
-						<div
-							className={`p-2 rounded-full ${
-								isDragActive ? "bg-[#15412e]" : "bg-gray-100"
-							}`}
-						>
-							<Upload
-								className={`h-5 w-5 ${
-									isDragActive ? "text-white" : "text-gray-500"
-								}`}
-							/>
-						</div>
+					<Upload
+						className={`h-5 w-5 transition-colors ${
+							isDragActive
+								? "text-white"
+								: "text-gray-600 group-hover:text-gray-800"
+						}`}
+					/>
+
+					<p
+						className={`text-sm font-medium transition-colors ${
+							isDragActive
+								? "text-white"
+								: "text-gray-600 group-hover:text-gray-800"
+						}`}
+					>
+						Select a File
+					</p>
+				</div>
+			) : (
+				/* Full Upload UI - With files */
+				<div className="space-y-4">
+					{/* Header */}
+					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-900 mb-1">
-								Drag & drop your files here
+							<h3 className="text-lg font-semibold text-gray-900">
+								File Upload
+							</h3>
+							<p className="text-sm text-gray-500 mt-1">
+								{activeUploads > 0 && completedFiles > 0
+									? `${completedFiles} completed, ${activeUploads} uploading`
+									: activeUploads > 0
+									  ? `${activeUploads} file${
+												activeUploads === 1 ? "" : "s"
+										  } uploading`
+									  : `${completedFiles} file${
+												completedFiles === 1 ? "" : "s"
+										  } uploaded`}
 							</p>
-							<p className="text-xs text-gray-500">
-								or{" "}
+						</div>
+						<div className="flex items-center gap-2">
+							{uploadFiles.length > 0 && (
 								<button
 									type="button"
-									onClick={handleFileInputClick}
-									className="text-[#15412e] hover:text-[#247050] font-medium underline"
+									onClick={() => setUploadFiles([])}
+									className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
 								>
-									browse from your device
+									Clear All
 								</button>
-							</p>
+							)}
 						</div>
 					</div>
-				</div>
-			</div>
 
-			{/* Upload Progress Section - Always visible when there are files */}
-			{hasFiles && (
-				<div className="border-t border-gray-100 flex-1 flex flex-col min-h-0">
-					<div
-						className="p-4 flex-shrink-0 cursor-pointer hover:bg-gray-50 transition-colors rounded-b-lg"
-						onClick={toggleExpanded}
-						onKeyDown={(e) => {
-							if (e.key === "Enter" || e.key === " ") {
-								e.preventDefault();
-								toggleExpanded();
-							}
-						}}
-						tabIndex={0}
-						role="button"
-					>
-						<div className="flex items-center justify-between">
-							<h4 className="text-sm font-medium text-gray-900">
-								Uploading Files
-							</h4>
-							<div className="flex items-center gap-2">
-								<span className="text-xs text-gray-500">
-									{uploadFiles.length} files
-								</span>
-								<div
-									className={`transition-transform duration-300 ease-in-out ${
-										isExpanded ? "rotate-180" : ""
-									}`}
-								>
-									<ChevronDown className="h-4 w-4 text-gray-500" />
+					<div className="flex gap-6 min-h-80">
+						{/* Left side - Drag & Drop */}
+						<div className="flex-[3] flex items-center justify-center">
+							<div
+								className={`
+                relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer w-full h-full flex items-center justify-center
+                ${
+									isDragActive
+										? "border-[#15412e] bg-[#e8f5e8] scale-[1.02]"
+										: "border-gray-300 hover:border-[#15412e] hover:bg-[#f8fdf8]"
+								}
+              `}
+								role="button"
+								tabIndex={0}
+								onDragEnter={onDragEnter}
+								onDragLeave={onDragLeave}
+								onDragOver={onDragOver}
+								onDrop={onDrop}
+								onClick={handleFileInputClick}
+								onKeyDown={(e) => {
+									if (e.key === "Enter" || e.key === " ") {
+										e.preventDefault();
+										handleFileInputClick();
+									}
+								}}
+								aria-label="Click to select more files or drag and drop files here"
+							>
+								<input
+									ref={fileInputRef}
+									type="file"
+									multiple
+									onChange={handleFileInputChange}
+									className="hidden"
+								/>
+
+								<div className="flex flex-col items-center gap-4">
+									<div
+										className={`p-3 rounded-full transition-colors ${
+											isDragActive ? "bg-[#15412e]" : "bg-gray-100"
+										}`}
+									>
+										<Upload
+											className={`h-6 w-6 transition-colors ${
+												isDragActive ? "text-white" : "text-gray-500"
+											}`}
+										/>
+									</div>
+									<div className="space-y-2">
+										<p className="text-base font-medium text-gray-900">
+											Drag & drop more files here
+										</p>
+										<p className="text-sm text-gray-500">
+											or{" "}
+											<span className="text-[#15412e] hover:text-[#247050] font-medium underline">
+												browse from your device
+											</span>
+										</p>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
 
-					{/* File list - conditionally rendered based on isExpanded */}
-					<div
-						className={`overflow-hidden transition-all duration-300 ease-in-out flex-1 ${
-							isExpanded ? "opacity-100" : "max-h-0 opacity-0"
-						}`}
-					>
-						<div className="px-4 pb-4 h-full">
-							<div className="space-y-3 overflow-y-auto h-full pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
-								{uploadFiles.map((uploadFile) => (
-									<div
-										key={uploadFile.id}
-										className="flex items-start gap-3 p-3 bg-white border border-gray-100 rounded-lg hover:shadow-sm transition-shadow"
-									>
-										<div className="flex-shrink-0 mt-1">
-											{uploadFile.file.name.endsWith(".pdf") && (
-												<div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
-													<FileText className="h-4 w-4 text-red-600" />
+						{/* Right side - Upload Progress */}
+						<div className="flex-[2]">
+							<div className="bg-gray-50 rounded-lg p-4 min-h-80 max-h-80 overflow-y-auto">
+								<div className="space-y-3">
+									{uploadFiles.map((uploadFile) => (
+										<div
+											key={uploadFile.id}
+											className="bg-white rounded-lg p-3 border border-gray-200"
+										>
+											<div className="flex items-start gap-3">
+												<div className="flex-shrink-0 mt-0.5">
+													{getFileIcon(uploadFile.file.name)}
 												</div>
-											)}
-											{uploadFile.file.name.endsWith(".mp4") && (
-												<div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
-													<Video className="h-4 w-4 text-purple-600" />
-												</div>
-											)}
-											{uploadFile.file.name.endsWith(".jpg") && (
-												<div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
-													<Image className="h-4 w-4 text-green-600" />
-												</div>
-											)}
-										</div>
-
-										<div className="flex-1 min-w-0">
-											<div className="flex items-start justify-between mb-1">
-												<div className="min-w-0 flex-1">
-													<p className="text-sm font-medium text-gray-900 truncate">
-														{uploadFile.file.name}
-													</p>
-													<p className="text-xs text-gray-500 mt-0.5">
+												<div className="flex-1 min-w-0">
+													<div className="flex items-center justify-between mb-1">
+														<p className="text-sm font-medium text-gray-900 truncate">
+															{uploadFile.file.name}
+														</p>
+														<button
+															type="button"
+															onClick={() => removeFile(uploadFile.id)}
+															className="flex-shrink-0 p-1 hover:bg-gray-100 rounded-full transition-colors"
+															aria-label="Remove file"
+														>
+															<X className="h-3 w-3 text-gray-400" />
+														</button>
+													</div>
+													<p className="text-xs text-gray-500 mb-2">
 														{formatFileSize(uploadFile.file.size)}
 													</p>
-												</div>
-												<div className="flex items-center gap-2 ml-2">
-													{uploadFile.status === "completed" && (
+
+													{/* Progress Bar */}
+													<div className="flex items-center gap-2">
+														<div className="flex-1 bg-gray-200 rounded-full h-2">
+															<div
+																className={`h-2 rounded-full transition-all duration-300 ${
+																	uploadFile.status === "completed"
+																		? "bg-green-500"
+																		: uploadFile.status === "error"
+																		  ? "bg-red-500"
+																		  : "bg-blue-500"
+																}`}
+																style={{
+																	width: `${Math.min(
+																		uploadFile.progress,
+																		100,
+																	)}%`,
+																}}
+															/>
+														</div>
 														<div className="flex items-center gap-1">
-															<CheckCircle className="h-4 w-4 text-[#15412e]" />
-															<span className="text-xs text-[#15412e] font-medium">
-																Completed
+															{uploadFile.status === "completed" && (
+																<CheckCircle className="h-4 w-4 text-green-500" />
+															)}
+															{uploadFile.status === "error" && (
+																<AlertCircle className="h-4 w-4 text-red-500" />
+															)}
+															<span className="text-xs text-gray-500 min-w-[3ch]">
+																{Math.round(uploadFile.progress)}%
 															</span>
 														</div>
-													)}
-													{uploadFile.status === "uploading" && (
-														<span className="text-xs text-blue-600 font-medium">
-															{Math.round(uploadFile.progress)}%
-														</span>
-													)}
-													{uploadFile.status === "error" && (
-														<AlertCircle className="h-4 w-4 text-red-500" />
-													)}
-													<button
-														type="button"
-														onClick={() => removeFile(uploadFile.id)}
-														className="p-1 hover:bg-gray-100 rounded transition-colors"
-													>
-														<X className="h-3 w-3 text-gray-400" />
-													</button>
+													</div>
+
+													{uploadFile.status === "error" &&
+														uploadFile.errorMessage && (
+															<p className="text-xs text-red-500 mt-1">
+																{uploadFile.errorMessage}
+															</p>
+														)}
 												</div>
 											</div>
-
-											{uploadFile.status === "uploading" && (
-												<div className="mt-2">
-													<div className="w-full bg-gray-200 rounded-full h-1.5">
-														<div
-															className="bg-blue-500 h-1.5 rounded-full transition-all duration-300 ease-out"
-															style={{ width: `${uploadFile.progress}%` }}
-														/>
-													</div>
-												</div>
-											)}
-
-											{uploadFile.status === "completed" && (
-												<div className="mt-2">
-													<div className="w-full bg-[#e8f5e8] rounded-full h-1.5">
-														<div className="bg-[#15412e] h-1.5 rounded-full w-full" />
-													</div>
-												</div>
-											)}
 										</div>
-									</div>
-								))}
+									))}
+								</div>
 							</div>
 						</div>
 					</div>
