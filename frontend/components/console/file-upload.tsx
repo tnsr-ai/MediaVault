@@ -255,7 +255,7 @@ export function FileUpload() {
 		<div
 			className={
 				hasFiles
-					? "bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4"
+					? "bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-500 ease-out p-4 animate-in fade-in slide-in-from-top-4"
 					: ""
 			}
 		>
