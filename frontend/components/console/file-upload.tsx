@@ -409,7 +409,7 @@ export function FileUpload() {
 
 						{/* Right side - Upload Progress */}
 						<div className="flex-[2]">
-							<div className="bg-gray-50 rounded-lg p-4 min-h-80 max-h-80 overflow-y-auto">
+							<div className="bg-gray-50 rounded-lg p-4 min-h-80 max-h-80 overflow-y-auto modern-scrollbar">
 								<div className="space-y-3">
 									{uploadFiles.map((uploadFile) => (
 										<div

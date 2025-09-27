@@ -250,7 +250,7 @@ export function RecentActivities() {
 					</CardTitle>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-6 flex-grow overflow-y-auto pr-2">
+			<CardContent className="space-y-6 flex-grow overflow-y-auto pr-2 modern-scrollbar">
 				{Object.entries(groupedActivities).map(([dateGroup, activities]) => (
 					<div key={dateGroup}>
 						{activities.length > 0 && (
