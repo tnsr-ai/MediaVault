@@ -52,18 +52,12 @@ const navigation = [
 
 export function Sidebar() {
 	const pathname = usePathname();
-	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 	const [isMounted, setIsMounted] = useState(false);
 
 	useEffect(() => {
 		setIsMounted(true);
-		const savedCollapsed = localStorage.getItem("sidebar-collapsed");
 		const savedExpanded = localStorage.getItem("sidebar-expanded-items");
-
-		if (savedCollapsed) {
-			setIsCollapsed(JSON.parse(savedCollapsed));
-		}
 
 		if (savedExpanded) {
 			setExpandedItems(new Set(JSON.parse(savedExpanded)));
@@ -86,45 +80,22 @@ export function Sidebar() {
 		}
 	};
 
-	const toggleCollapsed = () => {
-		const newCollapsed = !isCollapsed;
-		setIsCollapsed(newCollapsed);
-		if (typeof window !== "undefined") {
-			localStorage.setItem("sidebar-collapsed", JSON.stringify(newCollapsed));
-		}
-	};
-
 	return (
 		<div
 			className={cn(
-				"hidden bg-white md:block transition-all duration-300 h-screen overflow-hidden",
-				isMounted && isCollapsed ? "w-20" : "w-64",
+				"hidden bg-white md:block w-64 h-screen overflow-hidden",
 				inter.className,
 			)}
 		>
 			<div className="flex h-full flex-col gap-2">
 				<div
 					className={cn(
-						"flex h-18 items-center px-4 lg:h-[80px] cursor-pointer hover:bg-muted/50 transition-colors",
-						isCollapsed ? "justify-center" : "justify-between",
+						"flex h-18 items-center px-4 lg:h-[80px] justify-between",
 					)}
-					onClick={toggleCollapsed}
-					onKeyDown={(e) => {
-						if (e.key === "Enter" || e.key === " ") {
-							e.preventDefault();
-							toggleCollapsed();
-						}
-					}}
-					tabIndex={0}
-					role="button"
 				>
 					<Link
 						href="/dashboard"
-						className={cn(
-							"flex items-center gap-3 font-bold text-2xl",
-							isCollapsed && "justify-center",
-						)}
-						onClick={(e) => e.stopPropagation()}
+						className={cn("flex items-center gap-3 font-bold text-2xl")}
 					>
 						<NextImage
 							src="/dash-icon.svg"
@@ -133,13 +104,8 @@ export function Sidebar() {
 							height={48}
 							className="h-8 w-8"
 						/>
-						{isMounted && !isCollapsed && <span>MediaVault</span>}
+						{isMounted && <span>MediaVault</span>}
 					</Link>
-					{isCollapsed ? (
-						<ChevronRight className="h-4 w-4" />
-					) : (
-						<ChevronLeft className="h-4 w-4" />
-					)}
 				</div>
 				<div className="flex-1">
 					<nav className="grid items-start px-3 text-lg font-medium lg:px-5">
@@ -158,25 +124,21 @@ export function Sidebar() {
 												"flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground transition-all hover:text-primary w-full",
 												isActive &&
 													"bg-gradient-to-r from-[#0a1d12] via-[#15412e] to-[#247050] text-white gradient-animate-ready shadow-md hover:text-white animate-gradient-x",
-												isCollapsed && "justify-center px-1",
 											)}
-											title={isCollapsed ? item.name : undefined}
 										>
 											<item.icon className="h-6 w-6 flex-shrink-0" />
-											{!isCollapsed && (
-												<>
-													<span className="truncate flex-1 text-left">
-														{item.name}
-													</span>
-													{isExpanded ? (
-														<ChevronUp className="h-3 w-3" />
-													) : (
-														<ChevronDown className="h-3 w-3" />
-													)}
-												</>
-											)}
+											<>
+												<span className="truncate flex-1 text-left">
+													{item.name}
+												</span>
+												{isExpanded ? (
+													<ChevronUp className="h-3 w-3" />
+												) : (
+													<ChevronDown className="h-3 w-3" />
+												)}
+											</>
 										</button>
-										{isMounted && !isCollapsed && (
+										{isMounted && (
 											<div
 												className={cn(
 													"ml-4 space-y-1 overflow-hidden transition-all duration-400 relative pl-4",
@@ -223,14 +185,10 @@ export function Sidebar() {
 										"flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground transition-all hover:text-primary",
 										isActive &&
 											"bg-gradient-to-r from-[#0a1d12] via-[#15412e] to-[#247050] text-white gradient-animate-ready shadow-md hover:text-white animate-gradient-x",
-										isCollapsed && "justify-center px-1",
 									)}
-									title={isCollapsed ? item.name : undefined}
 								>
 									<item.icon className="h-6 w-6 flex-shrink-0" />
-									{isMounted && !isCollapsed && (
-										<span className="truncate">{item.name}</span>
-									)}
+									{isMounted && <span className="truncate">{item.name}</span>}
 								</Link>
 							);
 						})}
