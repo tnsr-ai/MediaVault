@@ -4,10 +4,8 @@ import { DashboardCharts } from "@/components/console/dashboard-charts";
 import { FileUpload } from "@/components/console/file-upload";
 import { FilesTable } from "@/components/console/files-table";
 import { RecentActivities } from "@/components/console/recent-activities";
-import { useState } from "react";
 
 export default function DashboardPage() {
-	const [isBlueExpanded, setIsBlueExpanded] = useState(false);
 	return (
 		<div className="grid grid-cols-7 gap-6">
 			{/* Top Row Content - Full Width */}

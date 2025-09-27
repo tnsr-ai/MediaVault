@@ -179,12 +179,15 @@ export function Sidebar() {
 										{isMounted && !isCollapsed && (
 											<div
 												className={cn(
-													"ml-4 space-y-1 overflow-hidden transition-all duration-400",
+													"ml-4 space-y-1 overflow-hidden transition-all duration-400 relative pl-4",
 													isExpanded
 														? "max-h-96 opacity-100"
 														: "max-h-0 opacity-0",
 												)}
 											>
+												{isExpanded && (
+													<div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#0a1d12] via-[#15412e] to-[#247050]" />
+												)}
 												{item.subItems.map((subItem) => {
 													const isSubActive = pathname === subItem.href;
 													return (
