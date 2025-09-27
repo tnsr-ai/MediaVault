@@ -423,7 +423,7 @@ export function FilesTable() {
 					All Files
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="p-0">
+			<CardContent className="px-4">
 				<div className="overflow-x-auto">
 					<Table>
 						<TableHeader>
