@@ -171,6 +171,41 @@ const sampleActivities: ActivityItem[] = [
 		time: "Sep 26, 2025, 09:15 AM",
 		members: 3,
 	},
+
+	// Earlier activities
+	{
+		id: 16,
+		type: "upload",
+		action: "Uploaded",
+		fileName: "Project Timeline.xlsx",
+		folder: "Planning › Projects",
+		time: "Sep 25, 2025, 04:30 PM",
+	},
+	{
+		id: 17,
+		type: "edit",
+		action: "Edited",
+		fileName: "Company Policies.pdf",
+		folder: "HR › Policies",
+		time: "Sep 24, 2025, 11:20 AM",
+	},
+	{
+		id: 18,
+		type: "delete",
+		action: "Deleted",
+		fileName: "Old Backup Files.zip",
+		folder: "Archive › Backups",
+		time: "Sep 23, 2025, 02:45 PM",
+	},
+	{
+		id: 19,
+		type: "share",
+		action: "Shared",
+		fileName: "Quarterly Review.pptx",
+		folder: "Presentations › Reviews",
+		time: "Sep 22, 2025, 10:15 AM",
+		members: 7,
+	},
 ];
 
 // Group activities by date
@@ -182,6 +217,7 @@ const groupActivitiesByDate = (activities: ActivityItem[]) => {
 	const grouped: { [key: string]: ActivityItem[] } = {
 		Today: [],
 		Yesterday: [],
+		Earlier: [],
 	};
 
 	for (const activity of activities) {
@@ -194,6 +230,8 @@ const groupActivitiesByDate = (activities: ActivityItem[]) => {
 			grouped.Today.push(activity);
 		} else if (isYesterday) {
 			grouped.Yesterday.push(activity);
+		} else {
+			grouped.Earlier.push(activity);
 		}
 	}
 
@@ -204,21 +242,15 @@ export function RecentActivities() {
 	const groupedActivities = groupActivitiesByDate(sampleActivities);
 
 	return (
-		<Card className="w-full h-fit">
-			<CardHeader className="pb-4">
+		<Card className="w-full min-h-[768px] max-h-[768px] overflow-hidden flex flex-col">
+			<CardHeader className="flex-shrink-0">
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-lg font-semibold text-gray-900">
 						Recent Activities
 					</CardTitle>
-					<button
-						type="button"
-						className="text-gray-400 hover:text-gray-600 transition-colors"
-					>
-						<span className="text-lg">⋯</span>
-					</button>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-6">
+			<CardContent className="space-y-6 flex-grow overflow-y-auto pr-2">
 				{Object.entries(groupedActivities).map(([dateGroup, activities]) => (
 					<div key={dateGroup}>
 						{activities.length > 0 && (
