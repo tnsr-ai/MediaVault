@@ -29,7 +29,7 @@ class HttpClient {
 					if (token) {
 						config.headers.Authorization = `Bearer ${token}`;
 					}
-				} catch (error) {
+				} catch {
 					// User is not authenticated, continue without token
 					console.debug("No auth session available");
 				}

@@ -2,7 +2,6 @@
 
 import { Input } from "@/components/ui/input";
 import { Bell, Search } from "lucide-react";
-import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 
 export function Header() {

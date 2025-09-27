@@ -4,7 +4,6 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength-indicator";
-import { userApi } from "@/lib/api/user";
 import { getAwsRegion } from "@/lib/aws-region-utils";
 import { config } from "@/lib/config";
 import { getButtonStyles, theme } from "@/lib/theme";

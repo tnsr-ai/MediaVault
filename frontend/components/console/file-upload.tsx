@@ -3,7 +3,6 @@
 import {
 	AlertCircle,
 	CheckCircle,
-	ChevronDown,
 	File,
 	FileText,
 	Image,
@@ -173,15 +172,6 @@ export function FileUpload() {
 		e.stopPropagation();
 	}, []);
 
-	const onDrop = useCallback((e: React.DragEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		setIsDragActive(false);
-
-		const files = Array.from(e.dataTransfer.files);
-		handleFiles(files);
-	}, []);
-
 	const handleFiles = useCallback((files: File[]) => {
 		const newUploadFiles: UploadFile[] = files.map((file) => ({
 			id: Math.random().toString(36).substring(2, 15),
@@ -197,6 +187,18 @@ export function FileUpload() {
 			simulateUpload(uploadFile.id);
 		}
 	}, []);
+
+	const onDrop = useCallback(
+		(e: React.DragEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			setIsDragActive(false);
+
+			const files = Array.from(e.dataTransfer.files);
+			handleFiles(files);
+		},
+		[handleFiles],
+	);
 
 	const simulateUpload = (fileId: string) => {
 		setUploadFiles((prev) =>
@@ -237,10 +239,6 @@ export function FileUpload() {
 
 	const removeFile = (fileId: string) => {
 		setUploadFiles((prev) => prev.filter((file) => file.id !== fileId));
-	};
-
-	const toggleExpanded = () => {
-		setIsExpanded(!isExpanded);
 	};
 
 	const hasFiles = uploadFiles.length > 0;

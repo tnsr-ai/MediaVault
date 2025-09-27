@@ -252,7 +252,7 @@ export function DashboardCharts() {
 								animationDuration={600}
 								animationEasing="ease-out"
 							>
-								{fileTypeData.map((entry, index) => (
+								{fileTypeData.map((entry) => (
 									<Cell key={`cell-${entry.name}`} fill={entry.color} />
 								))}
 							</Pie>

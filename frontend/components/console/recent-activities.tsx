@@ -50,7 +50,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "upload",
 		action: "Uploaded",
 		fileName: "Q4 Financial Report.pdf",
-		folder: "Reports › Finance",
+		folder: "Reports &rsaquo; Finance",
 		time: "Sep 27, 2025, 11:30 AM",
 	},
 	{
@@ -58,7 +58,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "edit",
 		action: "Edited",
 		fileName: "Product Roadmap 2026.pptx",
-		folder: "Presentations › Product",
+		folder: "Presentations &rsaquo; Product",
 		time: "Sep 27, 2025, 10:15 AM",
 	},
 	{
@@ -66,7 +66,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "share",
 		action: "Shared",
 		fileName: "Team Meeting Notes.docx",
-		folder: "Docs › Meetings",
+		folder: "Docs &rsaquo; Meetings",
 		time: "Sep 27, 2025, 09:45 AM",
 		members: 8,
 	},
@@ -75,7 +75,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "upload",
 		action: "Uploaded",
 		fileName: "Brand Guidelines.sketch",
-		folder: "Design › Brand",
+		folder: "Design &rsaquo; Brand",
 		time: "Sep 27, 2025, 08:20 AM",
 	},
 	{
@@ -83,7 +83,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "edit",
 		action: "Edited",
 		fileName: "User Research Findings.xlsx",
-		folder: "Research › UX",
+		folder: "Research &rsaquo; UX",
 		time: "Sep 27, 2025, 07:55 AM",
 	},
 
@@ -93,7 +93,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "share",
 		action: "Shared",
 		fileName: "Marketing Strategy.pdf",
-		folder: "Docs › Marketing",
+		folder: "Docs &rsaquo; Marketing",
 		time: "Sep 26, 2025, 06:42 PM",
 		members: 5,
 	},
@@ -102,7 +102,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "delete",
 		action: "Deleted",
 		fileName: "Old Project Files.zip",
-		folder: "Archive › Projects",
+		folder: "Archive &rsaquo; Projects",
 		time: "Sep 26, 2025, 05:30 PM",
 	},
 	{
@@ -110,7 +110,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "upload",
 		action: "Uploaded",
 		fileName: "Client Feedback Video.mp4",
-		folder: "Media › Feedback",
+		folder: "Media &rsaquo; Feedback",
 		time: "Sep 26, 2025, 04:15 PM",
 	},
 	{
@@ -118,7 +118,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "edit",
 		action: "Edited",
 		fileName: "Website Mockup V3.fig",
-		folder: "Design › Website",
+		folder: "Design &rsaquo; Website",
 		time: "Sep 26, 2025, 03:20 PM",
 	},
 	{
@@ -126,7 +126,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "share",
 		action: "Shared",
 		fileName: "Budget Report Q4.xlsx",
-		folder: "Finance › Reports",
+		folder: "Finance &rsaquo; Reports",
 		time: "Sep 26, 2025, 02:10 PM",
 		members: 12,
 	},
@@ -135,7 +135,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "upload",
 		action: "Uploaded",
 		fileName: "Employee Handbook.pdf",
-		folder: "HR › Documents",
+		folder: "HR &rsaquo; Documents",
 		time: "Sep 26, 2025, 01:45 PM",
 	},
 	{
@@ -143,7 +143,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "edit",
 		action: "Edited",
 		fileName: "API Documentation.md",
-		folder: "Dev › Docs",
+		folder: "Dev &rsaquo; Docs",
 		time: "Sep 26, 2025, 12:30 PM",
 	},
 	{
@@ -151,7 +151,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "delete",
 		action: "Deleted",
 		fileName: "Contract Template Old.docx",
-		folder: "Docs › Legal",
+		folder: "Docs &rsaquo; Legal",
 		time: "Sep 26, 2025, 11:05 AM",
 	},
 	{
@@ -159,7 +159,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "upload",
 		action: "Uploaded",
 		fileName: "Product Demo Screenshots.zip",
-		folder: "Marketing › Assets",
+		folder: "Marketing &rsaquo; Assets",
 		time: "Sep 26, 2025, 10:22 AM",
 	},
 	{
@@ -167,7 +167,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "share",
 		action: "Shared",
 		fileName: "Server Monitoring Dashboard.json",
-		folder: "Dev › Config",
+		folder: "Dev &rsaquo; Config",
 		time: "Sep 26, 2025, 09:15 AM",
 		members: 3,
 	},
@@ -178,7 +178,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "upload",
 		action: "Uploaded",
 		fileName: "Project Timeline.xlsx",
-		folder: "Planning › Projects",
+		folder: "Planning &rsaquo; Projects",
 		time: "Sep 25, 2025, 04:30 PM",
 	},
 	{
@@ -186,7 +186,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "edit",
 		action: "Edited",
 		fileName: "Company Policies.pdf",
-		folder: "HR › Policies",
+		folder: "HR &rsaquo; Policies",
 		time: "Sep 24, 2025, 11:20 AM",
 	},
 	{
@@ -194,7 +194,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "delete",
 		action: "Deleted",
 		fileName: "Old Backup Files.zip",
-		folder: "Archive › Backups",
+		folder: "Archive &rsaquo; Backups",
 		time: "Sep 23, 2025, 02:45 PM",
 	},
 	{
@@ -202,7 +202,7 @@ const sampleActivities: ActivityItem[] = [
 		type: "share",
 		action: "Shared",
 		fileName: "Quarterly Review.pptx",
-		folder: "Presentations › Reviews",
+		folder: "Presentations &rsaquo; Reviews",
 		time: "Sep 22, 2025, 10:15 AM",
 		members: 7,
 	},
@@ -266,7 +266,7 @@ export function RecentActivities() {
 												<div className="text-sm text-gray-900">
 													<span className="font-medium">{activity.action}</span>{" "}
 													<span className="font-medium text-blue-600">
-														"{activity.fileName}"
+														&ldquo;{activity.fileName}&rdquo;
 													</span>
 													{activity.folder && (
 														<>
