@@ -1,4 +1,4 @@
-import { FilesTable } from "@/components/console/files-table";
+import { FileUpload } from "@/components/console/file-upload";
 import { StorageUsageCard } from "@/components/console/storage-usage-card";
 
 export default function FilesPage() {
@@ -14,12 +14,13 @@ export default function FilesPage() {
 	};
 
 	return (
-		<div>
+		<div className="space-y-6">
 			<StorageUsageCard
 				currentUsageGB={storageData.currentUsageGB}
 				totalCapacityGB={storageData.totalCapacityGB}
 				categories={storageData.categories}
 			/>
+			<FileUpload expanded={false} />
 		</div>
 	);
 }

@@ -65,7 +65,11 @@ const formatFileSize = (bytes: number): string => {
 	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 };
 
-export function FileUpload() {
+interface FileUploadProps {
+	expanded?: boolean;
+}
+
+export function FileUpload({ expanded: propExpanded }: FileUploadProps = {}) {
 	const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([
 		// Dummy data for demonstration
 		{
@@ -142,18 +146,22 @@ export function FileUpload() {
 		},
 	]);
 	const [isDragActive, setIsDragActive] = useState(false);
-	const [isExpanded, setIsExpanded] = useState(true); // Start expanded to show files
+	const [internalExpanded, setInternalExpanded] = useState(true); // Start expanded to show files
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Use prop value if provided, otherwise use internal state
+	const isExpanded =
+		propExpanded !== undefined ? propExpanded : internalExpanded;
 
 	// Only auto-expand when new files are added, not for existing uploads
 	React.useEffect(() => {
 		const hasActiveUploads = uploadFiles.some(
 			(file) => file.status === "pending", // Only auto-expand for new files, not uploading ones
 		);
-		if (hasActiveUploads && !isExpanded) {
-			setIsExpanded(true);
+		if (hasActiveUploads && !isExpanded && propExpanded === undefined) {
+			setInternalExpanded(true);
 		}
-	}, [uploadFiles, isExpanded]);
+	}, [uploadFiles, isExpanded, propExpanded]);
 
 	const onDragEnter = useCallback((e: React.DragEvent) => {
 		e.preventDefault();
@@ -252,22 +260,22 @@ export function FileUpload() {
 	return (
 		<div
 			className={
-				hasFiles
+				hasFiles && isExpanded
 					? "bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-500 ease-out p-4 animate-in fade-in slide-in-from-top-4"
 					: ""
 			}
 		>
-			{!hasFiles ? (
-				/* Compact Upload UI - No files */
+			{!isExpanded ? (
+				/* Compact Upload UI */
 				<div
 					className={`
-            group relative border-2 border-dashed rounded-lg px-6 py-6 text-center transition-all duration-200 cursor-pointer flex items-center justify-center gap-3
-            ${
-							isDragActive
-								? "border-[#40916c] bg-[#2d6a4f] scale-[1.01]"
-								: "border-[#40916c] bg-[#eff4ef] hover:bg-[#e3eae3] hover:border-[#52b788] hover:scale-[1.01]"
-						}
-          `}
+	           group relative border-2 border-dashed rounded-lg px-6 py-6 text-center transition-all duration-200 cursor-pointer flex items-center justify-center gap-3
+	           ${
+								isDragActive
+									? "border-[#40916c] bg-[#2d6a4f] scale-[1.01]"
+									: "border-[#40916c] bg-[#eff4ef] hover:bg-[#e3eae3] hover:border-[#52b788] hover:scale-[1.01]"
+							}
+	         `}
 					role="button"
 					tabIndex={0}
 					onDragEnter={onDragEnter}
@@ -332,13 +340,24 @@ export function FileUpload() {
 						</div>
 						<div className="flex items-center gap-2">
 							{uploadFiles.length > 0 && (
-								<button
-									type="button"
-									onClick={() => setUploadFiles([])}
-									className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
-								>
-									Clear All
-								</button>
+								<>
+									{propExpanded === undefined && (
+										<button
+											type="button"
+											onClick={() => setInternalExpanded(!internalExpanded)}
+											className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
+										>
+											{internalExpanded ? "Collapse" : "Expand"}
+										</button>
+									)}
+									<button
+										type="button"
+										onClick={() => setUploadFiles([])}
+										className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
+									>
+										Clear All
+									</button>
+								</>
 							)}
 						</div>
 					</div>
