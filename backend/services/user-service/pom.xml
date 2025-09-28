@@ -105,12 +105,51 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Flyway Maven Plugin -->
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.7.2</version>
+				<configuration>
+					<url>${flyway.url}</url>
+					<user>${flyway.user}</user>
+					<password>${flyway.password}</password>
+					<driver>org.postgresql.Driver</driver>
+					<locations>classpath:db/migration</locations>
+					<baselineOnMigrate>true</baselineOnMigrate>
+					<validateOnMigrate>true</validateOnMigrate>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>flyway-env</id>
+			<activation>
+				<property>
+					<name>!flyway.url</name>
+				</property>
+			</activation>
+			<properties>
+				<flyway.url>jdbc:postgresql://${DB_HOST}:${DB_PORT}/mediavault</flyway.url>
+				<flyway.user>${DB_USER}</flyway.user>
+				<flyway.password>${DB_PASSWORD}</flyway.password>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>

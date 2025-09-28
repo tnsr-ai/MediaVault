@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS user_schema;
 
 SET search_path = user_schema, public;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cognito_user_id VARCHAR(255) NOT NULL UNIQUE,
     first_name VARCHAR(100) NOT NULL,
@@ -21,7 +21,6 @@ COMMENT ON COLUMN users.cognito_user_id IS 'The sub claim from the Cognito JWT';
 COMMENT ON COLUMN users.storage_quota_bytes IS 'Storage quota in bytes (default 10 GB)';
 COMMENT ON COLUMN users.storage_used_bytes IS 'Current storage usage in bytes';
 
-
-CREATE INDEX idx_users_cognito_user_id ON users(cognito_user_id);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_created_at ON users(created_at);
+CREATE INDEX IF NOT EXISTS idx_users_cognito_user_id ON users(cognito_user_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);

@@ -1,7 +1,7 @@
 import { config } from "@/lib/config";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Login from "../../components/auth/Login";
+import Login from "../../../components/auth/Login";
 
 export const metadata: Metadata = {
 	title: `${config.app.name} - Login`,

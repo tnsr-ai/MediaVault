@@ -23,15 +23,6 @@ export default function TwoFA() {
 	const [isLoading, setIsLoading] = useState(false);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-	const _form = useForm<TwoFAFormData>({
-		resolver: zodResolver(twoFASchema),
-		mode: "onSubmit",
-		reValidateMode: "onChange",
-		defaultValues: {
-			code: "",
-		},
-	});
-
 	const {
 		formState: { errors },
 		handleSubmit,
@@ -45,7 +36,7 @@ export default function TwoFA() {
 	});
 	const codeValue = watch("code");
 
-	const onSubmit = createFormSubmitHandler<TwoFAFormData>(async (data) => {
+	const onSubmit = createFormSubmitHandler<TwoFAFormData>(async () => {
 		// Handle 2FA verification logic here
 		// Simulate API call
 		await new Promise((resolve) => setTimeout(resolve, 1000));

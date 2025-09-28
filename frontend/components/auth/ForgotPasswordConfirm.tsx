@@ -20,9 +20,9 @@ import {
 } from "@/lib/validations/form-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { confirmResetPassword, resetPassword } from "aws-amplify/auth";
-import { CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import AuthFormLayout from "./AuthFormLayout";
@@ -36,7 +36,6 @@ const CODE_INPUTS = Array.from({ length: CODE_LENGTH }, (_, i) => ({
 }));
 
 function ForgotPasswordConfirmContent() {
-	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const [resetError, setResetError] = useState<string | null>(null);

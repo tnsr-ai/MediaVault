@@ -4,7 +4,6 @@ import { FormError } from "@/components/ui/form-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { config } from "@/lib/config";
-import { RESEND_TIMER_SECONDS } from "@/lib/constants/auth";
 import { getButtonStyles, getLinkStyles } from "@/lib/theme";
 import {
 	type ForgotPasswordFormData,
@@ -24,7 +23,6 @@ import AuthBottomLink from "./AuthBottomLink";
 import AuthFormLayout from "./AuthFormLayout";
 
 export default function Forgot() {
-	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [forgotError, setForgotError] = useState<string | null>(null);

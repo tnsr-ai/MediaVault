@@ -1,0 +1,30 @@
+"use client";
+
+import { Header } from "@/components/ui/header";
+import { Sidebar } from "@/components/ui/sidebar";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+	subsets: ["latin"],
+});
+
+export default function DashboardLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	return (
+		<div
+			className="fixed inset-0 grid overflow-hidden"
+			style={{ gridTemplateColumns: "auto 1fr" }}
+		>
+			<Sidebar />
+			<div className={`flex flex-col overflow-hidden ${inter.className}`}>
+				<Header />
+				<main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-[#f6f6f6] rounded-tl-2xl">
+					{children}
+				</main>
+			</div>
+		</div>
+	);
+}
