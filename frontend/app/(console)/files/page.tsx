@@ -1,3 +1,4 @@
+import { FileManagement } from "@/components/console/file-management";
 import { FileUpload } from "@/components/console/file-upload";
 import { StorageUsageCard } from "@/components/console/storage-usage-card";
 
@@ -21,6 +22,7 @@ export default function FilesPage() {
 				categories={storageData.categories}
 			/>
 			<FileUpload expanded={false} />
+			<FileManagement />
 		</div>
 	);
 }
