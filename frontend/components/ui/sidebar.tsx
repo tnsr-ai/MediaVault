@@ -117,27 +117,44 @@ export function Sidebar() {
 							if (hasSubItems) {
 								return (
 									<div key={item.name} className="space-y-1">
-										<button
-											type="button"
-											onClick={() => toggleExpanded(item.name)}
+										<Link
+											href={item.href}
 											className={cn(
 												"flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground transition-all hover:text-primary w-full",
 												isActive &&
 													"bg-gradient-to-r from-[#0a1d12] via-[#15412e] to-[#247050] text-white gradient-animate-ready shadow-md hover:text-white animate-gradient-x",
 											)}
+											onClick={(e) => {
+												// Only toggle expanded if the click is on the chevron area
+												const target = e.target as HTMLElement;
+												if (target.closest("svg")) {
+													e.preventDefault();
+													toggleExpanded(item.name);
+												}
+											}}
 										>
 											<item.icon className="h-6 w-6 flex-shrink-0" />
 											<>
 												<span className="truncate flex-1 text-left">
 													{item.name}
 												</span>
-												{isExpanded ? (
-													<ChevronUp className="h-3 w-3" />
-												) : (
-													<ChevronDown className="h-3 w-3" />
-												)}
+												<button
+													type="button"
+													onClick={(e) => {
+														e.preventDefault();
+														e.stopPropagation();
+														toggleExpanded(item.name);
+													}}
+													className="p-1 rounded hover:bg-muted-foreground/20"
+												>
+													{isExpanded ? (
+														<ChevronUp className="h-3 w-3" />
+													) : (
+														<ChevronDown className="h-3 w-3" />
+													)}
+												</button>
 											</>
-										</button>
+										</Link>
 										{isMounted && (
 											<div
 												className={cn(
