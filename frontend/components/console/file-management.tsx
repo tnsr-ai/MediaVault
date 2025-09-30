@@ -28,11 +28,11 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 							placeholder="Search file or folder"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="w-full h-12 rounded-full bg-[#ebece6] border-none pl-12 pr-4"
+							className="w-full h-12 rounded-full bg-[#ebece6] pl-12 pr-4"
 						/>
 					</div>
 
-					<div className="flex border rounded-full">
+					<div className="flex rounded-full">
 						<Button
 							variant={viewMode === "grid" ? "default" : "ghost"}
 							size="icon"
@@ -59,7 +59,7 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 						{/* Grid view will be implemented here */}
 					</div>
 				) : (
-					<div className="border rounded-lg">
+					<div className="rounded-lg">
 						{/* Table view will be implemented here */}
 					</div>
 				)}
