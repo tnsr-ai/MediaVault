@@ -3,7 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Grid, List, Search } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { FileDetailPanel } from "./file-detail-panel";
+import { FilesGrid } from "./files-grid";
+import { FilesTable } from "./files-table";
+import type { FileItem } from "./types";
 
 interface FileManagementProps {
 	title?: string;
@@ -12,6 +16,18 @@ interface FileManagementProps {
 export function FileManagement({ title = "All Files" }: FileManagementProps) {
 	const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+	const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+
+	const handleFileSelect = useCallback((file: FileItem) => {
+		setSelectedFile(file);
+		setIsDetailPanelOpen(true);
+	}, []);
+
+	const handleClosePanel = useCallback(() => {
+		setSelectedFile(null);
+		setIsDetailPanelOpen(false);
+	}, []);
 
 	return (
 		<div className="w-full">
@@ -53,14 +69,33 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 				</div>
 			</div>
 
-			<div>
-				{viewMode === "grid" ? (
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-						{/* Grid view will be implemented here */}
-					</div>
-				) : (
-					<div className="rounded-lg">
-						{/* Table view will be implemented here */}
+			<div className="flex h-[calc(100vh-200px)]">
+				{/* Main Content Area */}
+				<div className="flex-1 overflow-hidden flex flex-col">
+					{viewMode === "grid" ? (
+						<FilesGrid
+							searchQuery={searchQuery}
+							onFileSelect={handleFileSelect}
+							selectedFileId={selectedFile?.id}
+							isDetailPanelOpen={isDetailPanelOpen}
+						/>
+					) : (
+						<FilesTable
+							searchQuery={searchQuery}
+							onFileSelect={handleFileSelect}
+							selectedFileId={selectedFile?.id}
+						/>
+					)}
+				</div>
+
+				{/* File Detail Panel */}
+				{isDetailPanelOpen && selectedFile && (
+					<div className="w-96 bg-white border-l border-gray-200">
+						<FileDetailPanel
+							file={selectedFile}
+							isOpen={isDetailPanelOpen}
+							onClose={handleClosePanel}
+						/>
 					</div>
 				)}
 			</div>
