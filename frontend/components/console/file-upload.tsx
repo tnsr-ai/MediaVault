@@ -352,7 +352,13 @@ export function FileUpload({ expanded: propExpanded }: FileUploadProps = {}) {
 									)}
 									<button
 										type="button"
-										onClick={() => setUploadFiles([])}
+										onClick={() => {
+											setUploadFiles([]);
+											// Also collapse to show the compact upload UI when no files
+											if (propExpanded === undefined) {
+												setInternalExpanded(false);
+											}
+										}}
 										className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
 									>
 										Clear All
