@@ -51,7 +51,7 @@ const FolderIcon = ({
 	};
 
 	return (
-		<div className={`${sizeClass} relative`}>
+		<div className={`${sizeClass} relative`} style={{ aspectRatio: "5/4" }}>
 			<div
 				className={`absolute inset-0 bg-gradient-to-br ${getColorGradient(
 					color,
@@ -104,7 +104,7 @@ const FileIcon = ({
 	const { icon: Icon, gradient } = getFileIcon(type);
 
 	return (
-		<div className={`${sizeClass} relative`}>
+		<div className={`${sizeClass} relative`} style={{ aspectRatio: "5/4" }}>
 			<div
 				className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-lg shadow-md`}
 			>
@@ -116,12 +116,16 @@ const FileIcon = ({
 
 // Image thumbnail component
 const ImageThumbnail = ({ src, alt }: { src: string; alt: string }) => (
-	<div className="w-full h-full relative overflow-hidden rounded-lg">
+	<div
+		className="w-full h-full relative overflow-hidden rounded-lg"
+		style={{ aspectRatio: "5/4" }}
+	>
 		<img
 			src={src}
 			alt={alt}
 			className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
 			loading="lazy"
+			style={{ objectPosition: "center" }}
 		/>
 		<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
 	</div>
@@ -133,12 +137,16 @@ const VideoThumbnail = ({
 	alt,
 	duration,
 }: { src: string; alt: string; duration: string }) => (
-	<div className="w-full h-full relative overflow-hidden rounded-lg group">
+	<div
+		className="w-full h-full relative overflow-hidden rounded-lg group"
+		style={{ aspectRatio: "5/4" }}
+	>
 		<img
 			src={src}
 			alt={alt}
 			className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
 			loading="lazy"
+			style={{ objectPosition: "center" }}
 		/>
 		<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
 			<div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center transform transition-transform group-hover:scale-110">
