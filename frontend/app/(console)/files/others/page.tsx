@@ -1,7 +1,23 @@
-export default function OthersPage() {
+import { FileManagement } from "@/components/console/file-management";
+import { FileUpload } from "@/components/console/file-upload";
+import { StorageUsageCard } from "@/components/console/storage-usage-card";
+
+export default function FilesPage() {
+	const storageData = {
+		currentUsageGB: 18,
+		totalCapacityGB: 100,
+		categories: [{ name: "Other", percentage: 18, color: "#9f39f8" }],
+	};
+
 	return (
-		<div className="p-6">
-			<h1 className="text-3xl font-bold">Others</h1>
+		<div className="space-y-6">
+			<StorageUsageCard
+				currentUsageGB={storageData.currentUsageGB}
+				totalCapacityGB={storageData.totalCapacityGB}
+				categories={storageData.categories}
+			/>
+			<FileUpload expanded={false} />
+			<FileManagement />
 		</div>
 	);
 }
