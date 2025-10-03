@@ -750,78 +750,84 @@ export function FilesTable({
 	};
 
 	return (
-		<div className="w-full h-full flex flex-col bg-white rounded-2xl overflow-hidden ">
+		<div className="w-full h-full flex flex-col bg-white rounded-2xl overflow-hidden">
+			{/* Table Header - Sticky */}
+			<div className="sticky top-0 bg-white z-20 shadow-sm">
+				<div className="overflow-x-auto">
+					<Table>
+						<TableHeader>
+							<TableRow className="bg-gray-50/50">
+								<TableHead
+									className="w-[30%] cursor-pointer hover:bg-gray-100 select-none"
+									onClick={() => handleSort("name")}
+								>
+									<div className="flex items-center gap-2 text-gray-700 font-semibold">
+										File Name
+										<SortIndicator
+											direction={sortField === "name" ? sortDirection : null}
+										/>
+									</div>
+								</TableHead>
+								<TableHead
+									className="w-[10%] cursor-pointer hover:bg-gray-100 select-none"
+									onClick={() => handleSort("size")}
+								>
+									<div className="flex items-center gap-2 text-gray-700 font-semibold">
+										Size
+										<SortIndicator
+											direction={sortField === "size" ? sortDirection : null}
+										/>
+									</div>
+								</TableHead>
+								<TableHead
+									className="w-[15%] cursor-pointer hover:bg-gray-100 select-none"
+									onClick={() => handleSort("folder")}
+								>
+									<div className="flex items-center gap-2 text-gray-700 font-semibold">
+										Folder
+										<SortIndicator
+											direction={sortField === "folder" ? sortDirection : null}
+										/>
+									</div>
+								</TableHead>
+								<TableHead
+									className="w-[15%] cursor-pointer hover:bg-gray-100 select-none"
+									onClick={() => handleSort("owner")}
+								>
+									<div className="flex items-center gap-2 text-gray-700 font-semibold">
+										Owner
+										<SortIndicator
+											direction={sortField === "owner" ? sortDirection : null}
+										/>
+									</div>
+								</TableHead>
+								<TableHead className="w-[15%]">
+									<div className="text-gray-700 font-semibold">Members</div>
+								</TableHead>
+								<TableHead
+									className="w-[15%] cursor-pointer hover:bg-gray-100 select-none"
+									onClick={() => handleSort("lastModified")}
+								>
+									<div className="flex items-center gap-2 text-gray-700 font-semibold">
+										Last Modified
+										<SortIndicator
+											direction={
+												sortField === "lastModified" ? sortDirection : null
+											}
+										/>
+									</div>
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+					</Table>
+				</div>
+			</div>
+
 			{/* Table Content */}
 			<div className="flex-1 overflow-hidden flex flex-col">
 				<div className="flex-1 overflow-y-auto scrollbar-hide">
-					<div className="overflow-x-auto bg-white">
+					<div className="overflow-x-auto">
 						<Table>
-							<TableHeader className="sticky top-0 bg-white z-10">
-								<TableRow className="border-b border-gray-200">
-									<TableHead
-										className="cursor-pointer hover:bg-gray-50 select-none"
-										onClick={() => handleSort("name")}
-									>
-										<div className="flex items-center gap-2 text-gray-600 font-medium">
-											File Name
-											<SortIndicator
-												direction={sortField === "name" ? sortDirection : null}
-											/>
-										</div>
-									</TableHead>
-									<TableHead
-										className="cursor-pointer hover:bg-gray-50 select-none"
-										onClick={() => handleSort("size")}
-									>
-										<div className="flex items-center gap-2 text-gray-600 font-medium">
-											Size
-											<SortIndicator
-												direction={sortField === "size" ? sortDirection : null}
-											/>
-										</div>
-									</TableHead>
-									<TableHead
-										className="cursor-pointer hover:bg-gray-50 select-none"
-										onClick={() => handleSort("folder")}
-									>
-										<div className="flex items-center gap-2 text-gray-600 font-medium">
-											Folder
-											<SortIndicator
-												direction={
-													sortField === "folder" ? sortDirection : null
-												}
-											/>
-										</div>
-									</TableHead>
-									<TableHead
-										className="cursor-pointer hover:bg-gray-50 select-none"
-										onClick={() => handleSort("owner")}
-									>
-										<div className="flex items-center gap-2 text-gray-600 font-medium">
-											Owner
-											<SortIndicator
-												direction={sortField === "owner" ? sortDirection : null}
-											/>
-										</div>
-									</TableHead>
-									<TableHead>
-										<div className="text-gray-600 font-medium">Members</div>
-									</TableHead>
-									<TableHead
-										className="cursor-pointer hover:bg-gray-50 select-none"
-										onClick={() => handleSort("lastModified")}
-									>
-										<div className="flex items-center gap-2 text-gray-600 font-medium">
-											Last Modified
-											<SortIndicator
-												direction={
-													sortField === "lastModified" ? sortDirection : null
-												}
-											/>
-										</div>
-									</TableHead>
-								</TableRow>
-							</TableHeader>
 							<TableBody>
 								{paginatedFiles.map((item) => (
 									<TableRow
@@ -832,7 +838,7 @@ export function FilesTable({
 										onClick={() => handleFileClick(item)}
 										onContextMenu={(e) => handleContextMenu(e, item)}
 									>
-										<TableCell>
+										<TableCell className="w-[30%]">
 											<div className="flex items-center gap-3">
 												{item.type === "folder" ? (
 													<FolderIcon color={item.color} />
@@ -844,25 +850,25 @@ export function FilesTable({
 												</span>
 											</div>
 										</TableCell>
-										<TableCell>
+										<TableCell className="w-[10%]">
 											<span className="text-gray-600">
 												{item.type === "folder"
 													? `${item.items} items`
 													: item.size}
 											</span>
 										</TableCell>
-										<TableCell>
+										<TableCell className="w-[15%]">
 											<span className="text-gray-600">{item.folder}</span>
 										</TableCell>
-										<TableCell>
+										<TableCell className="w-[15%]">
 											<span className="text-gray-900 font-medium">
 												{item.owner}
 											</span>
 										</TableCell>
-										<TableCell>
+										<TableCell className="w-[15%]">
 											<MemberAvatars members={item.members || []} />
 										</TableCell>
-										<TableCell>
+										<TableCell className="w-[15%]">
 											<span className="text-gray-600">{item.lastModified}</span>
 										</TableCell>
 									</TableRow>
@@ -886,7 +892,7 @@ export function FilesTable({
 								type="button"
 								onClick={handlePrevious}
 								disabled={currentPage === 1}
-								className={`px-4 py-2 text-sm font-medium border rounded-full transition-all duration-200 ${
+								className={`px-4 py-2 text-sm font-medium border rounded-lg transition-all duration-200 ${
 									currentPage === 1
 										? "border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
 										: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
@@ -919,7 +925,7 @@ export function FilesTable({
 												<button
 													type="button"
 													onClick={() => handlePageChange(page)}
-													className={`px-3 py-2 text-sm font-medium border rounded-full transition-all duration-200 ${
+													className={`px-3 py-2 text-sm font-medium border rounded-lg transition-all duration-200 ${
 														currentPage === page
 															? "border-blue-500 bg-blue-50 text-blue-600 shadow-sm"
 															: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
