@@ -64,7 +64,7 @@ const FileTypeIcon = ({
 
 	return (
 		<div
-			className={`${sizeClass} ${bg} ${color} rounded-lg flex items-center justify-center`}
+			className={`${sizeClass} ${bg} ${color} rounded-xl flex items-center justify-center`}
 		>
 			<Icon className="w-3/4 h-3/4" />
 		</div>
@@ -91,7 +91,7 @@ const formatDate = (dateString: string) => {
 const FilePreview = ({ file }: { file: FileItem }) => {
 	if (file.type === "folder") {
 		return (
-			<div className="w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
+			<div className="w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center">
 				<FolderOpen className="w-16 h-16 text-blue-600" />
 			</div>
 		);
@@ -104,7 +104,7 @@ const FilePreview = ({ file }: { file: FileItem }) => {
 			file.fileType?.toLowerCase().includes("avi")
 		) {
 			return (
-				<div className="w-full h-48 relative rounded-lg overflow-hidden group">
+				<div className="w-full h-48 relative rounded-xl overflow-hidden group">
 					<img
 						src={file.thumbnail}
 						alt={file.name}
@@ -116,7 +116,7 @@ const FilePreview = ({ file }: { file: FileItem }) => {
 						</div>
 					</div>
 					{file.duration && (
-						<div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+						<div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-lg">
 							{file.duration}
 						</div>
 					)}
@@ -127,13 +127,13 @@ const FilePreview = ({ file }: { file: FileItem }) => {
 			<img
 				src={file.thumbnail}
 				alt={file.name}
-				className="w-full h-48 object-cover rounded-lg"
+				className="w-full h-48 object-cover rounded-xl"
 			/>
 		);
 	}
 
 	return (
-		<div className="w-full h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+		<div className="w-full h-48 bg-gray-50 rounded-xl flex items-center justify-center">
 			<FileTypeIcon type={file.fileType || "unknown"} size="large" />
 		</div>
 	);
@@ -285,7 +285,7 @@ export function FileDetailPanel({
 
 	return (
 		<div
-			className={`h-full w-full bg-white overflow-hidden flex flex-col ${
+			className={`h-full w-full bg-white flex flex-col ${
 				isOpen ? "flex" : "hidden"
 			}`}
 		>
@@ -316,7 +316,7 @@ export function FileDetailPanel({
 								type="text"
 								value={fileName}
 								onChange={(e) => setFileName(e.target.value)}
-								className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+								className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 								onKeyDown={(e) => {
 									if (e.key === "Enter") handleRename();
 									if (e.key === "Escape") setIsEditing(false);

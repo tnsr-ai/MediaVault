@@ -134,7 +134,7 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 
 				{/* File Detail Panel */}
 				{isDetailPanelOpen && selectedFile && (
-					<div className="w-96 bg-white border-l border-gray-200">
+					<div className="w-96 bg-white border-l border-gray-200 overflow-hidden rounded-2xl ml-4">
 						<FileDetailPanel
 							file={selectedFile}
 							isOpen={isDetailPanelOpen}
