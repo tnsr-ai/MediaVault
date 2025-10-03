@@ -1,25 +1,28 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-	Download,
+	Copy,
+	Edit3,
 	FileText,
 	Film,
 	Folder,
 	Image,
-	MoreHorizontal,
+	Info,
 	Music,
 	Play,
+	Scissors,
 	Share,
 	Trash2,
+	Type,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FileItem, FileSelectCallback } from "./types";
 
 interface FilesGridProps {
 	searchQuery?: string;
 	onFileSelect?: FileSelectCallback;
 	onFileOpen?: (file: FileItem) => void;
+	onContextMenuAction?: (action: string, item: FileItem) => void;
 	selectedFileId?: number | null;
 	isDetailPanelOpen?: boolean;
 }
@@ -159,19 +162,137 @@ const VideoThumbnail = ({
 	</div>
 );
 
+// Context menu component
+const ContextMenu = ({
+	x,
+	y,
+	onClose,
+	onAction,
+	item,
+}: {
+	x: number;
+	y: number;
+	onClose: () => void;
+	onAction: (action: string, item: FileItem) => void;
+	item: FileItem;
+}) => {
+	const menuRef = useRef<HTMLDivElement>(null);
+
+	// Close the menu when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+				onClose();
+			}
+		};
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				onClose();
+			}
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener("keydown", handleKeyDown);
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [onClose]);
+
+	const handleActionClick = (action: string) => {
+		onAction(action, item);
+		onClose();
+	};
+
+	return (
+		<div
+			ref={menuRef}
+			className="fixed bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[180px]"
+			style={{ left: x, top: y }}
+		>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("copy")}
+			>
+				<Copy className="w-4 h-4" />
+				Copy
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("cut")}
+			>
+				<Scissors className="w-4 h-4" />
+				Cut
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("paste")}
+			>
+				<Type className="w-4 h-4" />
+				Paste
+			</button>
+			<div className="border-t border-gray-200 my-1" />
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("rename")}
+			>
+				<Edit3 className="w-4 h-4" />
+				Rename
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("delete")}
+			>
+				<Trash2 className="w-4 h-4 text-red-600" />
+				Delete
+			</button>
+			<div className="border-t border-gray-200 my-1" />
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("share")}
+			>
+				<Share className="w-4 h-4" />
+				Share
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("info")}
+			>
+				<Info className="w-4 h-4" />
+				File information
+			</button>
+		</div>
+	);
+};
+
 // Grid item component with enhanced design
 const GridItem = ({
 	item,
 	onSelect,
 	onOpen,
 	isSelected,
+	onContextMenuAction,
 }: {
 	item: FileItem;
 	onSelect: FileSelectCallback;
 	onOpen?: (file: FileItem) => void;
 	isSelected: boolean;
+	onContextMenuAction?: (action: string, item: FileItem) => void;
 }) => {
 	const [showActions, setShowActions] = useState(false);
+	const [contextMenu, setContextMenu] = useState<{
+		x: number;
+		y: number;
+	} | null>(null);
 	const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const lastClickTimeRef = useRef<number>(0);
 
@@ -212,6 +333,27 @@ const GridItem = ({
 
 		lastClickTimeRef.current = now;
 	}, [item, onSelect, onOpen]);
+
+	const handleContextMenu = useCallback((e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setContextMenu({ x: e.clientX, y: e.clientY });
+	}, []);
+
+	const handleContextMenuClose = useCallback(() => {
+		setContextMenu(null);
+	}, []);
+
+	const handleContextMenuAction = useCallback(
+		(action: string) => {
+			if (onContextMenuAction) {
+				onContextMenuAction(action, item);
+			} else {
+				console.log(`${action} action for ${item.name}`);
+			}
+		},
+		[item, onContextMenuAction],
+	);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
@@ -258,69 +400,46 @@ const GridItem = ({
 	};
 
 	return (
-		<div
-			className={`group relative cursor-pointer transform transition-all duration-200 hover:scale-[1.02] ${
-				isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""
-			}`}
-			onClick={handleClick}
-			onKeyDown={handleKeyDown}
-			onMouseEnter={() => setShowActions(true)}
-			onMouseLeave={() => setShowActions(false)}
-			tabIndex={0}
-			role="button"
-			aria-label={`Select ${item.name}`}
-		>
-			<div className="aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-200">
-				<div className="p-4 h-full flex flex-col">
-					<div className="flex-1 flex items-center justify-center mb-3">
-						{renderThumbnail()}
-					</div>
-					<div className="space-y-1">
-						<h3 className="text-sm font-medium text-gray-900 truncate leading-tight">
-							{item.name}
-						</h3>
-						<p className="text-xs text-gray-500">
-							{item.type === "folder" ? `${item.items} items` : item.size}
-						</p>
+		<>
+			<div
+				className={`group relative cursor-pointer transform transition-all duration-200 hover:scale-[1.02] ${
+					isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""
+				}`}
+				onClick={handleClick}
+				onKeyDown={handleKeyDown}
+				onContextMenu={handleContextMenu}
+				onMouseEnter={() => setShowActions(true)}
+				onMouseLeave={() => setShowActions(false)}
+				tabIndex={0}
+				role="button"
+				aria-label={`Select ${item.name}`}
+			>
+				<div className="aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-200">
+					<div className="p-4 h-full flex flex-col">
+						<div className="flex-1 flex items-center justify-center mb-3">
+							{renderThumbnail()}
+						</div>
+						<div className="space-y-1">
+							<h3 className="text-sm font-medium text-gray-900 truncate leading-tight">
+								{item.name}
+							</h3>
+							<p className="text-xs text-gray-500">
+								{item.type === "folder" ? `${item.items} items` : item.size}
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
-
-			{/* Action buttons overlay */}
-			<div
-				className={`absolute top-2 right-2 flex gap-1 transition-all duration-200 ${
-					showActions ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-				}`}
-			>
-				<Button
-					variant="secondary"
-					size="icon"
-					className="h-8 w-8 bg-white/90 hover:bg-white shadow-md"
-					onClick={(e) => handleAction("download", e)}
-					aria-label="Download"
-				>
-					<Download className="h-4 w-4" />
-				</Button>
-				<Button
-					variant="secondary"
-					size="icon"
-					className="h-8 w-8 bg-white/90 hover:bg-white shadow-md"
-					onClick={(e) => handleAction("share", e)}
-					aria-label="Share"
-				>
-					<Share className="h-4 w-4" />
-				</Button>
-				<Button
-					variant="secondary"
-					size="icon"
-					className="h-8 w-8 bg-white/90 hover:bg-white shadow-md"
-					onClick={(e) => handleAction("more", e)}
-					aria-label="More options"
-				>
-					<MoreHorizontal className="h-4 w-4" />
-				</Button>
-			</div>
-		</div>
+			{contextMenu && (
+				<ContextMenu
+					x={contextMenu.x}
+					y={contextMenu.y}
+					onClose={handleContextMenuClose}
+					onAction={handleContextMenuAction}
+					item={item}
+				/>
+			)}
+		</>
 	);
 };
 
@@ -346,7 +465,7 @@ const Pagination = ({
 	const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
 	return (
-		<div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-white">
+		<div className="flex items-center justify-between px-6 py-4 bg-white">
 			<div className="flex items-center gap-2 text-sm text-gray-600">
 				<span>
 					Showing {startIndex + 1} to {endIndex} of {totalItems} items
@@ -644,6 +763,7 @@ export function FilesGrid({
 	searchQuery = "",
 	onFileSelect,
 	onFileOpen,
+	onContextMenuAction,
 	selectedFileId,
 	isDetailPanelOpen = false,
 }: FilesGridProps) {
@@ -709,6 +829,7 @@ export function FilesGrid({
 							item={item}
 							onSelect={handleSelect}
 							onOpen={onFileOpen}
+							onContextMenuAction={onContextMenuAction}
 							isSelected={selectedFileId === item.id}
 						/>
 					))}
@@ -733,7 +854,7 @@ export function FilesGrid({
 			</div>
 
 			{/* Pagination - Always visible at bottom */}
-			<div className="flex-shrink-0 border-t border-gray-200 bg-white">
+			<div className="flex-shrink-0 rounded-2xl overflow-hidden">
 				{totalPages > 1 && (
 					<Pagination
 						currentPage={currentPage}

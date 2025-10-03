@@ -30,6 +30,40 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 		// In the future, this would navigate to folders or open files
 	}, []);
 
+	const handleContextMenuAction = useCallback(
+		(action: string, file: FileItem) => {
+			switch (action) {
+				case "copy":
+					console.log(`Copying ${file.name}`);
+					break;
+				case "cut":
+					console.log(`Cutting ${file.name}`);
+					break;
+				case "paste":
+					console.log(`Pasting to ${file.name}`);
+					break;
+				case "rename":
+					console.log(`Renaming ${file.name}`);
+					break;
+				case "delete":
+					console.log(`Deleting ${file.name}`);
+					break;
+				case "share":
+					console.log(`Sharing ${file.name}`);
+					break;
+				case "info":
+					console.log(`Showing information for ${file.name}`);
+					// Also open the detail panel for file information
+					setSelectedFile(file);
+					setIsDetailPanelOpen(true);
+					break;
+				default:
+					console.log(`Unknown action: ${action} for ${file.name}`);
+			}
+		},
+		[],
+	);
+
 	const handleClosePanel = useCallback(() => {
 		setSelectedFile(null);
 		setIsDetailPanelOpen(false);
@@ -83,6 +117,7 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 							searchQuery={searchQuery}
 							onFileSelect={handleFileSelect}
 							onFileOpen={handleFileOpen}
+							onContextMenuAction={handleContextMenuAction}
 							selectedFileId={selectedFile?.id}
 							isDetailPanelOpen={isDetailPanelOpen}
 						/>
@@ -91,6 +126,7 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 							searchQuery={searchQuery}
 							onFileSelect={handleFileSelect}
 							onFileOpen={handleFileOpen}
+							onContextMenuAction={handleContextMenuAction}
 							selectedFileId={selectedFile?.id}
 						/>
 					)}

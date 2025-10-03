@@ -9,8 +9,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Folder } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import {
+	Copy,
+	Edit3,
+	FileText,
+	Folder,
+	Info,
+	Scissors,
+	Share,
+	Trash2,
+	Type,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FileItem, FileSelectCallback } from "./types";
 
 // Folder icon component
@@ -155,6 +165,118 @@ const SortIndicator = ({
 		<span className="text-blue-600">↑</span>
 	) : (
 		<span className="text-blue-600">↓</span>
+	);
+};
+
+// Context menu component
+const ContextMenu = ({
+	x,
+	y,
+	onClose,
+	onAction,
+	item,
+}: {
+	x: number;
+	y: number;
+	onClose: () => void;
+	onAction: (action: string, item: FileItem) => void;
+	item: FileItem;
+}) => {
+	const menuRef = useRef<HTMLDivElement>(null);
+
+	// Close the menu when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+				onClose();
+			}
+		};
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				onClose();
+			}
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener("keydown", handleKeyDown);
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [onClose]);
+
+	const handleActionClick = (action: string) => {
+		onAction(action, item);
+		onClose();
+	};
+
+	return (
+		<div
+			ref={menuRef}
+			className="fixed bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[180px]"
+			style={{ left: x, top: y }}
+		>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("copy")}
+			>
+				<Copy className="w-4 h-4" />
+				Copy
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("cut")}
+			>
+				<Scissors className="w-4 h-4" />
+				Cut
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("paste")}
+			>
+				<Type className="w-4 h-4" />
+				Paste
+			</button>
+			<div className="border-t border-gray-200 my-1" />
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("rename")}
+			>
+				<Edit3 className="w-4 h-4" />
+				Rename
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("delete")}
+			>
+				<Trash2 className="w-4 h-4 text-red-600" />
+				Delete
+			</button>
+			<div className="border-t border-gray-200 my-1" />
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("share")}
+			>
+				<Share className="w-4 h-4" />
+				Share
+			</button>
+			<button
+				type="button"
+				className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3"
+				onClick={() => handleActionClick("info")}
+			>
+				<Info className="w-4 h-4" />
+				File information
+			</button>
+		</div>
 	);
 };
 
@@ -473,6 +595,7 @@ interface FilesTableProps {
 	searchQuery?: string;
 	onFileSelect?: FileSelectCallback;
 	onFileOpen?: (file: FileItem) => void;
+	onContextMenuAction?: (action: string, item: FileItem) => void;
 	selectedFileId?: number | null;
 }
 
@@ -480,6 +603,7 @@ export function FilesTable({
 	searchQuery = "",
 	onFileSelect,
 	onFileOpen,
+	onContextMenuAction,
 	selectedFileId,
 }: FilesTableProps) {
 	const [sortField, setSortField] = useState<SortField | null>(null);
@@ -488,6 +612,11 @@ export function FilesTable({
 	const itemsPerPage = 10;
 	const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const lastClickTimeRef = useRef<number>(0);
+	const [contextMenu, setContextMenu] = useState<{
+		x: number;
+		y: number;
+		item: FileItem;
+	} | null>(null);
 
 	const handleFileClick = useCallback(
 		(item: FileItem) => {
@@ -521,6 +650,30 @@ export function FilesTable({
 			lastClickTimeRef.current = now;
 		},
 		[onFileSelect, onFileOpen],
+	);
+
+	const handleContextMenu = useCallback(
+		(e: React.MouseEvent, item: FileItem) => {
+			e.preventDefault();
+			e.stopPropagation();
+			setContextMenu({ x: e.clientX, y: e.clientY, item });
+		},
+		[],
+	);
+
+	const handleContextMenuClose = useCallback(() => {
+		setContextMenu(null);
+	}, []);
+
+	const handleContextMenuAction = useCallback(
+		(action: string, item: FileItem) => {
+			if (onContextMenuAction) {
+				onContextMenuAction(action, item);
+			} else {
+				console.log(`${action} action for ${item.name}`);
+			}
+		},
+		[onContextMenuAction],
 	);
 
 	const handleSort = (field: SortField) => {
@@ -597,12 +750,7 @@ export function FilesTable({
 	};
 
 	return (
-		<div className="w-full h-full flex flex-col bg-white">
-			{/* Table Header */}
-			<div className="flex-shrink-0 border-b border-gray-200 bg-white px-4 py-3">
-				<h2 className="text-lg font-semibold text-gray-900">All Files</h2>
-			</div>
-
+		<div className="w-full h-full flex flex-col bg-white rounded-2xl overflow-hidden ">
 			{/* Table Content */}
 			<div className="flex-1 overflow-hidden flex flex-col">
 				<div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -682,6 +830,7 @@ export function FilesTable({
 											selectedFileId === item.id ? "bg-blue-50/50" : ""
 										}`}
 										onClick={() => handleFileClick(item)}
+										onContextMenu={(e) => handleContextMenu(e, item)}
 									>
 										<TableCell>
 											<div className="flex items-center gap-3">
@@ -724,7 +873,7 @@ export function FilesTable({
 				</div>
 
 				{/* Pagination Controls */}
-				<div className="flex-shrink-0 border-t border-gray-200 bg-white">
+				<div className="flex-shrink-0 border-t border-gray-200 bg-white rounded-b-2xl overflow-hidden">
 					<div className="flex items-center justify-between px-6 py-4 bg-white">
 						<div className="flex items-center gap-2 text-sm text-gray-600">
 							<span>
@@ -737,11 +886,12 @@ export function FilesTable({
 								type="button"
 								onClick={handlePrevious}
 								disabled={currentPage === 1}
-								className={`px-3 py-1 text-sm border rounded-md transition-colors ${
+								className={`px-4 py-2 text-sm font-medium border rounded-full transition-all duration-200 ${
 									currentPage === 1
-										? "border-gray-200 text-gray-400 cursor-not-allowed"
-										: "border-gray-300 text-gray-700 hover:bg-gray-50"
+										? "border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
+										: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
 								}`}
+								aria-label="Previous page"
 							>
 								Previous
 							</button>
@@ -751,7 +901,7 @@ export function FilesTable({
 									.filter((page) => {
 										// Show first page, last page, current page, and 2 pages around current
 										if (page === 1 || page === totalPages) return true;
-										if (Math.abs(page - currentPage) <= 1) return true;
+										if (Math.abs(page - currentPage) <= 2) return true;
 										return false;
 									})
 									.map((page, index, array) => {
@@ -769,11 +919,15 @@ export function FilesTable({
 												<button
 													type="button"
 													onClick={() => handlePageChange(page)}
-													className={`px-3 py-1 text-sm border rounded-md transition-colors ${
+													className={`px-3 py-2 text-sm font-medium border rounded-full transition-all duration-200 ${
 														currentPage === page
-															? "border-blue-500 bg-blue-50 text-blue-600"
-															: "border-gray-300 text-gray-700 hover:bg-gray-50"
+															? "border-blue-500 bg-blue-50 text-blue-600 shadow-sm"
+															: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
 													}`}
+													aria-label={`Go to page ${page}`}
+													aria-current={
+														currentPage === page ? "page" : undefined
+													}
 												>
 													{page}
 												</button>
@@ -786,11 +940,12 @@ export function FilesTable({
 								type="button"
 								onClick={handleNext}
 								disabled={currentPage === totalPages}
-								className={`px-3 py-1 text-sm border rounded-md transition-colors ${
+								className={`px-4 py-2 text-sm font-medium border rounded-full transition-all duration-200 ${
 									currentPage === totalPages
-										? "border-gray-200 text-gray-400 cursor-not-allowed"
-										: "border-gray-300 text-gray-700 hover:bg-gray-50"
+										? "border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
+										: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
 								}`}
+								aria-label="Next page"
 							>
 								Next
 							</button>
@@ -798,6 +953,17 @@ export function FilesTable({
 					</div>
 				</div>
 			</div>
+
+			{/* Context Menu */}
+			{contextMenu && (
+				<ContextMenu
+					x={contextMenu.x}
+					y={contextMenu.y}
+					onClose={handleContextMenuClose}
+					onAction={handleContextMenuAction}
+					item={contextMenu.item}
+				/>
+			)}
 		</div>
 	);
 }
