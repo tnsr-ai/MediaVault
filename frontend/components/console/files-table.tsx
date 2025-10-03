@@ -10,7 +10,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Folder } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { FileItem, FileSelectCallback } from "./types";
 
 // Folder icon component
@@ -472,18 +472,56 @@ type SortDirection = "asc" | "desc";
 interface FilesTableProps {
 	searchQuery?: string;
 	onFileSelect?: FileSelectCallback;
+	onFileOpen?: (file: FileItem) => void;
 	selectedFileId?: number | null;
 }
 
 export function FilesTable({
 	searchQuery = "",
 	onFileSelect,
+	onFileOpen,
 	selectedFileId,
 }: FilesTableProps) {
 	const [sortField, setSortField] = useState<SortField | null>(null);
 	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
+	const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const lastClickTimeRef = useRef<number>(0);
+
+	const handleFileClick = useCallback(
+		(item: FileItem) => {
+			const now = Date.now();
+			const timeSinceLastClick = now - lastClickTimeRef.current;
+
+			// Clear any existing timeout
+			if (clickTimeoutRef.current) {
+				clearTimeout(clickTimeoutRef.current);
+				clickTimeoutRef.current = null;
+			}
+
+			// Check if this is a double click (within 300ms)
+			if (timeSinceLastClick < 300) {
+				// This is a double click - open the file/folder
+				if (onFileOpen) {
+					onFileOpen(item);
+				} else {
+					console.log(`Opening ${item.name} (${item.type})`);
+				}
+			} else {
+				// This might be a single click - wait to see if a second click follows
+				clickTimeoutRef.current = setTimeout(() => {
+					// No second click came in time, so treat as single click
+					if (onFileSelect) {
+						onFileSelect(item);
+					}
+				}, 300);
+			}
+
+			lastClickTimeRef.current = now;
+		},
+		[onFileSelect, onFileOpen],
+	);
 
 	const handleSort = (field: SortField) => {
 		if (sortField === field) {
@@ -524,6 +562,11 @@ export function FilesTable({
 		// Handle string sorting for other fields
 		const aValue = a[sortField];
 		const bValue = b[sortField];
+
+		// Handle undefined values
+		if (aValue === undefined && bValue === undefined) return 0;
+		if (aValue === undefined) return sortDirection === "asc" ? 1 : -1;
+		if (bValue === undefined) return sortDirection === "asc" ? -1 : 1;
 
 		if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
 		if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
@@ -638,11 +681,7 @@ export function FilesTable({
 										className={`hover:bg-gray-50/50 transition-colors cursor-pointer ${
 											selectedFileId === item.id ? "bg-blue-50/50" : ""
 										}`}
-										onClick={() => {
-											if (onFileSelect) {
-												onFileSelect(item);
-											}
-										}}
+										onClick={() => handleFileClick(item)}
 									>
 										<TableCell>
 											<div className="flex items-center gap-3">

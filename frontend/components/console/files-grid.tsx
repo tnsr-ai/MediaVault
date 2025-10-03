@@ -13,12 +13,13 @@ import {
 	Share,
 	Trash2,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { FileItem, FileSelectCallback } from "./types";
 
 interface FilesGridProps {
 	searchQuery?: string;
 	onFileSelect?: FileSelectCallback;
+	onFileOpen?: (file: FileItem) => void;
 	selectedFileId?: number | null;
 	isDetailPanelOpen?: boolean;
 }
@@ -154,13 +155,17 @@ const VideoThumbnail = ({
 const GridItem = ({
 	item,
 	onSelect,
+	onOpen,
 	isSelected,
 }: {
 	item: FileItem;
 	onSelect: FileSelectCallback;
+	onOpen?: (file: FileItem) => void;
 	isSelected: boolean;
 }) => {
 	const [showActions, setShowActions] = useState(false);
+	const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const lastClickTimeRef = useRef<number>(0);
 
 	const handleAction = useCallback(
 		(action: string, e: React.MouseEvent) => {
@@ -172,17 +177,51 @@ const GridItem = ({
 	);
 
 	const handleClick = useCallback(() => {
-		onSelect(item);
-	}, [item, onSelect]);
+		const now = Date.now();
+		const timeSinceLastClick = now - lastClickTimeRef.current;
+
+		// Clear any existing timeout
+		if (clickTimeoutRef.current) {
+			clearTimeout(clickTimeoutRef.current);
+			clickTimeoutRef.current = null;
+		}
+
+		// Check if this is a double click (within 300ms)
+		if (timeSinceLastClick < 300) {
+			// This is a double click - open the file/folder
+			if (onOpen) {
+				onOpen(item);
+			} else {
+				console.log(`Opening ${item.name} (${item.type})`);
+			}
+		} else {
+			// This might be a single click - wait to see if a second click follows
+			clickTimeoutRef.current = setTimeout(() => {
+				// No second click came in time, so treat as single click
+				onSelect(item);
+			}, 300);
+		}
+
+		lastClickTimeRef.current = now;
+	}, [item, onSelect, onOpen]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if (e.key === "Enter" || e.key === " ") {
+			if (e.key === "Enter") {
 				e.preventDefault();
+				// Enter key should open the file/folder
+				if (onOpen) {
+					onOpen(item);
+				} else {
+					console.log(`Opening ${item.name} (${item.type})`);
+				}
+			} else if (e.key === " ") {
+				e.preventDefault();
+				// Space key should select the file/folder
 				onSelect(item);
 			}
 		},
-		[item, onSelect],
+		[item, onSelect, onOpen],
 	);
 
 	const renderThumbnail = () => {
@@ -596,6 +635,7 @@ const sampleItems: FileItem[] = [
 export function FilesGrid({
 	searchQuery = "",
 	onFileSelect,
+	onFileOpen,
 	selectedFileId,
 	isDetailPanelOpen = false,
 }: FilesGridProps) {
@@ -660,6 +700,7 @@ export function FilesGrid({
 							key={item.id}
 							item={item}
 							onSelect={handleSelect}
+							onOpen={onFileOpen}
 							isSelected={selectedFileId === item.id}
 						/>
 					))}

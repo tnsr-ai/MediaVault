@@ -24,6 +24,12 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 		setIsDetailPanelOpen(true);
 	}, []);
 
+	const handleFileOpen = useCallback((file: FileItem) => {
+		console.log(`Opening ${file.name} (${file.type})`);
+		// For now, we're just console logging as requested
+		// In the future, this would navigate to folders or open files
+	}, []);
+
 	const handleClosePanel = useCallback(() => {
 		setSelectedFile(null);
 		setIsDetailPanelOpen(false);
@@ -76,6 +82,7 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 						<FilesGrid
 							searchQuery={searchQuery}
 							onFileSelect={handleFileSelect}
+							onFileOpen={handleFileOpen}
 							selectedFileId={selectedFile?.id}
 							isDetailPanelOpen={isDetailPanelOpen}
 						/>
@@ -83,6 +90,7 @@ export function FileManagement({ title = "All Files" }: FileManagementProps) {
 						<FilesTable
 							searchQuery={searchQuery}
 							onFileSelect={handleFileSelect}
+							onFileOpen={handleFileOpen}
 							selectedFileId={selectedFile?.id}
 						/>
 					)}
