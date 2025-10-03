@@ -120,7 +120,7 @@ const UserAvatar = ({
 
 	return (
 		<div
-			className={`${sizeClass} rounded-full bg-blue-500 text-white flex items-center justify-center font-medium`}
+			className={`${sizeClass} rounded-full bg-[#247050] text-white flex items-center justify-center font-medium`}
 		>
 			{initials}
 		</div>
@@ -146,7 +146,7 @@ const MemberAvatars = ({
 				</div>
 			))}
 			{extraCount > 0 && (
-				<div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-medium">
+				<div className="w-6 h-6 rounded-full bg-[#10462f] text-white flex items-center justify-center text-xs font-medium">
 					+{extraCount}
 				</div>
 			)}
@@ -162,9 +162,9 @@ const SortIndicator = ({
 }) => {
 	if (!direction) return <span className="text-gray-300">↕</span>;
 	return direction === "asc" ? (
-		<span className="text-blue-600">↑</span>
+		<span className="text-[#247050]">↑</span>
 	) : (
-		<span className="text-blue-600">↓</span>
+		<span className="text-[#247050]">↓</span>
 	);
 };
 
@@ -833,7 +833,7 @@ export function FilesTable({
 									<TableRow
 										key={item.id}
 										className={`hover:bg-gray-50/50 transition-colors cursor-pointer ${
-											selectedFileId === item.id ? "bg-blue-50/50" : ""
+											selectedFileId === item.id ? "bg-[#e8f5ee]/50" : ""
 										}`}
 										onClick={() => handleFileClick(item)}
 										onContextMenu={(e) => handleContextMenu(e, item)}
@@ -927,7 +927,7 @@ export function FilesTable({
 													onClick={() => handlePageChange(page)}
 													className={`px-3 py-2 text-sm font-medium border rounded-lg transition-all duration-200 ${
 														currentPage === page
-															? "border-blue-500 bg-blue-50 text-blue-600 shadow-sm"
+															? "border-[#247050] bg-[#e8f5ee] text-[#10462f] shadow-sm"
 															: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
 													}`}
 													aria-label={`Go to page ${page}`}

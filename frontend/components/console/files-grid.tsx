@@ -403,7 +403,7 @@ const GridItem = ({
 		<>
 			<div
 				className={`group relative cursor-pointer transform transition-all duration-200 hover:scale-[1.02] ${
-					isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""
+					isSelected ? "ring-2 ring-[#247050] ring-offset-2" : ""
 				}`}
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
@@ -507,7 +507,7 @@ const Pagination = ({
 										onClick={() => onPageChange(page)}
 										className={`px-3 py-2 text-sm font-medium border rounded-lg transition-all duration-200 ${
 											currentPage === page
-												? "border-blue-500 bg-blue-50 text-blue-600 shadow-sm"
+												? "border-[#247050] bg-[#e8f5ee] text-[#10462f] shadow-sm"
 												: "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
 										}`}
 										aria-label={`Go to page ${page}`}

@@ -38,7 +38,7 @@ const FileTypeIcon = ({
 			case "docx":
 			case "doc":
 			case "txt":
-				return { icon: FileText, color: "text-blue-600", bg: "bg-blue-100" };
+				return { icon: FileText, color: "text-[#10462f]", bg: "bg-[#e8f5ee]" };
 			case "jpg":
 			case "jpeg":
 			case "png":
@@ -91,8 +91,8 @@ const formatDate = (dateString: string) => {
 const FilePreview = ({ file }: { file: FileItem }) => {
 	if (file.type === "folder") {
 		return (
-			<div className="w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center">
-				<FolderOpen className="w-16 h-16 text-blue-600" />
+			<div className="w-full h-48 bg-gradient-to-br from-[#e8f5ee] to-[#d5dcd9] rounded-xl flex items-center justify-center">
+				<FolderOpen className="w-16 h-16 text-[#10462f]" />
 			</div>
 		);
 	}
@@ -316,7 +316,7 @@ export function FileDetailPanel({
 								type="text"
 								value={fileName}
 								onChange={(e) => setFileName(e.target.value)}
-								className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+								className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#247050]"
 								onKeyDown={(e) => {
 									if (e.key === "Enter") handleRename();
 									if (e.key === "Escape") setIsEditing(false);
@@ -475,7 +475,7 @@ export function FileDetailPanel({
 								variant="ghost"
 								size="sm"
 								onClick={handleCopyPath}
-								className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
+								className="h-6 px-2 text-xs text-[#247050] hover:text-[#10462f]"
 							>
 								<Copy className="w-3 h-3 mr-1" />
 								Copy
